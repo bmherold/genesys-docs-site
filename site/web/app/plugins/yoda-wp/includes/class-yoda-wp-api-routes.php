@@ -61,7 +61,7 @@ class Yoda_WP_API_Routes {
 		));
 
 		register_rest_route('api/v1', '/guides', array(
-			'methods' => 'GET',
+			'methods' => 'POST',
 			'callback' => [$this->api, 'get_guides']
 		));
 	}
