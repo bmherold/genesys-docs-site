@@ -100,6 +100,18 @@ class Yoda_WP_Admin {
 
 	}
 
+    private function sanitizer( $type, $data ) {
+        if ( empty( $type ) ) { return; }
+        if ( empty( $data ) ) { return; }
+        $return     = '';
+        $sanitizer  = new Yoda_WP_Sanitize();
+        $sanitizer->set_data( $data );
+        $sanitizer->set_type( $type );
+        $return = $sanitizer->clean();
+        unset( $sanitizer );
+        return $return;
+    }
+
 	/**
 	 * Creates a new custom post type
 	 *
@@ -198,7 +210,7 @@ class Yoda_WP_Admin {
 	}
 
 	/**
-	 * Registers metaboxes with WordPress 
+	 * Registers metaboxes with WordPress
 	 *
 	 * @param Object $post Existing post object.
 	 *
@@ -206,7 +218,7 @@ class Yoda_WP_Admin {
 	 * @access 	public
 	 */
 	public function cpt_announcement_add_metaboxes( $post ) {
-		/* add_meta_box( 
+		/* add_meta_box(
 			string $id,
 			string $title,
 			callable $callback,
@@ -241,7 +253,7 @@ class Yoda_WP_Admin {
 		$fields[] = array('announcement-show-once', 'checkbox');
 
 		$this->validate_meta( $_POST, $post_id, $object, $noncesCheck, $fields);
-	} 
+	}
 
 	/**
 	 * Calls a metabox file specified in the add_meta_box args.
@@ -256,7 +268,7 @@ class Yoda_WP_Admin {
 		if ( ! empty( $params['args']['classes'] ) ) {
 			$classes = 'repeater ' . $params['args']['classes'];
 		}
-		
+
 		include( plugin_dir_path( __FILE__ ) . 'partials/yoda-wp-admin-metabox-' . $params['args']['file'] . '.php' );
 	}
 

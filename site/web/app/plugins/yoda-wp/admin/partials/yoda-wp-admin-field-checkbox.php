@@ -15,5 +15,5 @@
         name="<?php echo esc_attr( $atts['name'] ); ?>"
         type="checkbox"
         value="1" />
-    <span class="description"><?php esc_html_e( $atts['description'], 'yoda-wp' ); ?></span>
+    <span class="description"><?php esc_html_e( $atts['label'], 'yoda-wp' ); ?></span>
 </label>
