@@ -71,7 +71,7 @@ class Yoda_WP_API {
 	 * @since    1.0.0
 	 */
 	public function get_guides ( WP_REST_Request $request ) {
-		return $this->db->get_posts();
+		return $this->db->get_guides('/', [], []);
 	}
 
 }

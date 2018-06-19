@@ -55,4 +55,22 @@ class Yoda_WP_API_DB {
 		return $get_posts->query($r);
 	}
 
+	public function get_guides($route, $permissions, $users) {
+		return [
+			[
+				"title" => "titsle",
+				"steps" => [
+					[
+						"selector" => '.section-header',
+						"content"  => '<div> WIZARDS</div>'
+					],
+					[
+						"selector" => '.breadcrumbs',
+						"content"  => '<div> WIZARDS EVERYWHERE </div>'
+					]
+				]
+			]
+		];
+	}
+
 }
