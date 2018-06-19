@@ -75,10 +75,10 @@ class Yoda_WP_API_DB {
 				case 'announcement':
 					return [
 						'title' => $x['post_title'],
-						'steps' => [
+						'steps' => [[
 							'selector' => current($x['meta']['announcement-url']),
 							'content' => $x['post_content'],
-						],
+						]],
 						'type' => $x['post_type'],
 						'created' => $x['post_date'],
 						'updated' => $x['post_modified'],
