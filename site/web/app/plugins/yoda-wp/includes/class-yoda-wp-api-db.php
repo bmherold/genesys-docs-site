@@ -85,7 +85,7 @@ class Yoda_WP_API_DB {
 						'id' => $x['ID'],
 						'steps' => [[
 							'title' => $x['post_title'],
-							'selector' => current($x['meta']['announcement-selector']),
+							'selector' => isset($x['meta']['announcement-selector']) ? current($x['meta']['announcement-selector']) : '',
 							'content' => $x['post_content'],
 							]],
 							'type' => $x['post_type'],

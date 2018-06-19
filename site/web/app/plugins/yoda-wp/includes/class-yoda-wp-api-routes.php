@@ -44,41 +44,33 @@ class Yoda_WP_API_Routes {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-yoda-wp-api.php';
 	}
 
+
+	/**
+	 * Make sure we do nice CORS things.
+	 *
+	 * @since    1.0.0
+	 */
+	public function cors_init() {
+		header("Access-Control-Allow-Origin: " . get_http_origin()); // TODO - dont allow everywhere!
+		header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
+		header("Access-Control-Allow-Credentials: true");
+
+		if ( 'OPTIONS' == $_SERVER['REQUEST_METHOD'] ) {
+				status_header(200);
+				exit();
+		}
+	}
+
 	/**
 	 * Register the API endpoints for getting our custom data.
 	 *
 	 * @since    1.0.0
 	 */
 	public function rest_api_init () {
-		// remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
-		// add_filter( 'rest_pre_serve_request', function( $value ) {
-		// 	header( 'Access-Control-Allow-Origin: *' );
-		// 	header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
-		// 	header( 'Access-Control-Allow-Credentials: true' );
-		// 	return $value;
-		// });
-
-		// remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
-		// add_filter( 'rest_pre_serve_request', function( $value ) {
-		// 	$origin = get_http_origin();
-		// 	if ( $origin && in_array( $origin, array(
-		// 			'localhost:4400'
-		// 		) ) ) {
-		// 		header( 'Access-Control-Allow-Origin: ' . esc_url_raw( $origin ) );
-		// 		header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
-		// 		header( 'Access-Control-Allow-Credentials: true' );
-		// 	}
-		// 	return $value;
-		// });
-
-		// add_filter( 'allowed_http_origin', '__return_true' );
-
-		// add_filter('http_origin', function() { return "http://localhost:4400";});
-
-		$origin = 'https://localhost:4400';
-		header( 'Access-Control-Allow-Origin: ' . esc_url_raw( $origin ) );
-		header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
-		header( 'Access-Control-Allow-Credentials: true' );
+		// $origin = 'http://www.test-cors.org';
+		// header( 'Access-Control-Allow-Origin: ' . esc_url_raw( $origin ) );
+		// header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
+		// header( 'Access-Control-Allow-Credentials: true' );
 
 		register_rest_route('api/v1', '/test/(?P<value>.*)', array(
 			'methods' => 'GET',

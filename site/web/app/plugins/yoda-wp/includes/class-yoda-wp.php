@@ -205,6 +205,7 @@ class Yoda_WP {
 
 		$plugin_api_routes = new Yoda_WP_API_Routes();
 
+		$this->loader->add_action( 'init', $plugin_api_routes, 'cors_init' );
 		$this->loader->add_action( 'rest_api_init', $plugin_api_routes, 'rest_api_init' );
 	}
 
