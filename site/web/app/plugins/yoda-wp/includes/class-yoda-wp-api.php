@@ -48,11 +48,12 @@ class Yoda_WP_API {
 	 * Echos back the value supplied to the test route
 	 * @since    1.0.0
 	 */
-	public function test ( WP_REST_Request $request ) {
+	public function get_test ( WP_REST_Request $request ) {
 		$test_value = $request->get_param( 'value' );
 
 		return [
-			'test_value' => $test_value
+			'test_value' => $test_value,
+			'query_params' =>  $request->get_query_params()
 		];
 	}
 
@@ -61,6 +62,15 @@ class Yoda_WP_API {
 	 * @since    1.0.0
 	 */
 	public function get_posts ( WP_REST_Request $request ) {
+		return $this->db->get_posts();
+	}
+
+	/**
+	 * Returns all the guides in the database.
+	 *
+	 * @since    1.0.0
+	 */
+	public function get_guides ( WP_REST_Request $request ) {
 		return $this->db->get_posts();
 	}
 
