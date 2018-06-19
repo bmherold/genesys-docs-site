@@ -33,25 +33,14 @@ class Yoda_WP_API_DB {
 			return $this->getDummyGuideData();
 		}
 
-		return $this->getAnnouncements();
-	}
+		$announcements = $this->getAnnouncements();
+		// return $announcements;
 
-	private function getDummyGuideData() {
-		return [
-			[
-				"title" => "titsle",
-				"steps" => [
-					[
-						"selector" => '.section-header',
-						"content"  => '<div> WIZARDS</div>'
-					],
-					[
-						"selector" => '.breadcrumbs',
-						"content"  => '<div> WIZARDS EVERYWHERE </div>'
-					]
-				]
-			]
-		];
+		$wizards = $this->getWizards();
+		// return $wizards;
+
+
+		return array_merge($announcements, $wizards);
 	}
 
 	private function getAnnouncements() {
@@ -65,19 +54,53 @@ class Yoda_WP_API_DB {
 		return $this->filterPosts($announcements);
 	}
 
+	private function getWizards() {
+		$wizards =  $this->queryPosts([
+			'post_type' => 'wizard',
+			'post_status' => 'publish',
+		], true);
+
+		// return $wizards;
+
+		return $this->filterPosts($wizards);
+	}
+
 	private function filterPosts($posts) {
-		error_log(print_r($posts,true));
+		// error_log(print_r($posts,true));
 
 		return array_map(function($x) {
 			$x = $x->to_array();
-			return [
-				'title' => $x['post_title'],
-				'steps' => [
-					'selector' => current($x['meta']['announcement-url']),
-					'content' => $x['post_content'],
-				],
-				'type' => $x['post_type']
-			];
+
+			switch ($x['post_type']) {
+				case 'announcement':
+					return [
+						'title' => $x['post_title'],
+						'steps' => [
+							'selector' => current($x['meta']['announcement-url']),
+							'content' => $x['post_content'],
+						],
+						'type' => $x['post_type'],
+						'created' => $x['post_date'],
+						'updated' => $x['post_modified'],
+					];
+
+					break;
+
+				case 'wizard':
+					return [
+						'title' => $x['post_title'],
+						'steps' => [],
+						'type' => $x['post_type'],
+						'created' => $x['post_date'],
+						'updated' => $x['post_modified'],
+					];
+
+					break;
+
+				default:
+					return $x;
+					break;
+			}
 		}, $posts);
 	}
 
@@ -123,6 +146,24 @@ class Yoda_WP_API_DB {
 		}
 
 		return $post_results;
+	}
+
+	private function getDummyGuideData() {
+		return [
+			[
+				"title" => "titsle",
+				"steps" => [
+					[
+						"selector" => '.section-header',
+						"content"  => '<div> WIZARDS</div>'
+					],
+					[
+						"selector" => '.breadcrumbs',
+						"content"  => '<div> WIZARDS EVERYWHERE </div>'
+					]
+				]
+			]
+		];
 	}
 
 }
