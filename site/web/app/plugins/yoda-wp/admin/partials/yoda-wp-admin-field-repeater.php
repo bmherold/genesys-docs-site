@@ -12,7 +12,7 @@
  * @package    Yoda_WP
  * @subpackage Yoda_WP/admin/partials
  */
-echo '<pre>'; print_r( $repeater ); echo '</pre>';
+// echo '<pre>'; print_r( $repeater ); echo '</pre>';
 ?><ul class="repeaters"><?php
     for ( $i = 0; $i <= $count; $i++ ) {
         if ( $i === $count ) {
