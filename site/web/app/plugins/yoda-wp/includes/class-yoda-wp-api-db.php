@@ -76,6 +76,7 @@ class Yoda_WP_API_DB {
 					'selector' => current($x['meta']['announcement-url']),
 					'content' => $x['post_content'],
 				],
+				'type' => $x['post_type']
 			];
 		}, $posts);
 	}
