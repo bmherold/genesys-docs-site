@@ -50,6 +50,14 @@ class Yoda_WP_API_Routes {
 	 * @since    1.0.0
 	 */
 	public function rest_api_init () {
+		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+		add_filter( 'rest_pre_serve_request', function( $value ) {
+			header( 'Access-Control-Allow-Origin: *' );
+			header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
+			header( 'Access-Control-Allow-Credentials: true' );
+			return $value;
+		});
+
 		register_rest_route('api/v1', '/test/(?P<value>.*)', array(
 			'methods' => 'GET',
 			'callback' => [$this->api, 'get_test']
