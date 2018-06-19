@@ -252,6 +252,7 @@ class Yoda_WP_Admin {
 		$fields = array();
 		$fields[] = array('announcement-url', 'text');
 		$fields[] = array('announcement-permissions', 'text');
+        $fields[] = array('announcement-selector', 'text');
 		$fields[] = array('announcement-show-once', 'checkbox');
 
 		$this->validate_meta( $_POST, $post_id, $object, $nonces, $fields);

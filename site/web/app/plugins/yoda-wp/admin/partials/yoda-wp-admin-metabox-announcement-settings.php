@@ -49,6 +49,23 @@ include( plugin_dir_path( __FILE__ ) . $this->plugin_name . '-admin-field-text.p
 ?></p><?php
 
 $atts                   = array();
+$atts['class']          = 'widefat';
+$atts['description']    = '';
+$atts['id']             = 'announcement-selector';
+$atts['label']          = 'Select Element on Page';
+$atts['name']           = 'announcement-selector';
+$atts['placeholder']    = '';
+$atts['type']           = 'text';
+$atts['value']          = '';
+if ( ! empty( $this->meta[$atts['id']][0] ) ) {
+    $atts['value'] = $this->meta[$atts['id']][0];
+}
+apply_filters( $this->plugin_name . '-field-' . $atts['id'], $atts );
+?><p><?php
+include( plugin_dir_path( __FILE__ ) . $this->plugin_name . '-admin-field-text.php' );
+?></p><?php
+
+$atts                   = array();
 $atts['class']          = '';
 $atts['description']    = '';
 $atts['id']             = 'announcement-show-once';
