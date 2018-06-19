@@ -96,7 +96,7 @@ class Yoda_WP_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/yoda-wp-admin.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/yoda-wp-admin.js', array( 'jquery', 'jquery-ui-sortable' ), $this->version, true );
 
 	}
 
@@ -482,7 +482,7 @@ class Yoda_WP_Admin {
 					} // foreach $clean
 				} // for
 			} else {
-				$new_value = $this->sanitizer( $type, $posted[$name] );
+				$new_value = $this->sanitizer( $type, $posted[$name] ?? null );
 			}
 			update_post_meta( $post_id, $name, $new_value );
 		} // foreach
