@@ -122,8 +122,13 @@ class Yoda_WP {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-yoda-wp-public.php';
 
-		$this->loader = new Yoda_WP_Loader();
+        /**
+         * The class responsible for sanitizing user input
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-yoda-wp-sanitizer.php';
 
+		$this->loader = new Yoda_WP_Loader();
+        $this->sanitizer = new Yoda_WP_Sanitize();
 	}
 
 	/**
