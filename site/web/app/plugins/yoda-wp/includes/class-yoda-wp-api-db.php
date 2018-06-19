@@ -25,16 +25,77 @@ class Yoda_WP_API_DB {
 	}
 
 	public function get_posts() {
-		$defaults = array(
-			'numberposts' => 5,
-			'category' => 0, 'orderby' => 'date',
-			'order' => 'DESC', 'include' => array(),
-			'exclude' => array(), 'meta_key' => '',
-			'meta_value' =>'', 'post_type' => 'post',
-			'suppress_filters' => true
-		);
+		return $this->queryPosts();
+	}
 
-		$r = wp_parse_args( $args, $defaults );
+	public function get_guides($route, $permissions, $users, $use_dummy_data = false) {
+		if ($use_dummy_data) {
+			return $this->getDummyGuideData();
+		}
+
+		return $this->getAnnouncements();
+	}
+
+	private function getDummyGuideData() {
+		return [
+			[
+				"title" => "titsle",
+				"steps" => [
+					[
+						"selector" => '.section-header',
+						"content"  => '<div> WIZARDS</div>'
+					],
+					[
+						"selector" => '.breadcrumbs',
+						"content"  => '<div> WIZARDS EVERYWHERE </div>'
+					]
+				]
+			]
+		];
+	}
+
+	private function getAnnouncements() {
+		$announcements =  $this->queryPosts([
+			'post_type' => 'announcement',
+			'post_status' => 'publish',
+		], true);
+
+		// return $announcements;
+
+		return $this->filterPosts($announcements);
+	}
+
+	private function filterPosts($posts) {
+		error_log(print_r($posts,true));
+
+		return array_map(function($x) {
+			$x = $x->to_array();
+			return [
+				'title' => $x['post_title'],
+				'steps' => [
+					'selector' => current($x['meta']['announcement-url']),
+					'content' => $x['post_content'],
+				],
+			];
+		}, $posts);
+	}
+
+	private function queryPosts($options = [], $with_meta = false) {
+		$defaults = [
+			'numberposts' => 5,
+			'category' => 0,
+			'orderby' => 'date',
+			'order' => 'DESC',
+			'include' => array(),
+			'exclude' => array(),
+			'meta_key' => '',
+			'meta_value' =>'',
+			'post_type' => 'post',
+			'suppress_filters' => true
+		];
+		$defaults = array_merge($defaults, $options);
+
+		$r = wp_parse_args( [], $defaults );
 		if ( empty( $r['post_status'] ) )
 				$r['post_status'] = ( 'attachment' == $r['post_type'] ) ? 'inherit' : 'publish';
 		if ( ! empty($r['numberposts']) && empty($r['posts_per_page']) )
@@ -52,25 +113,15 @@ class Yoda_WP_API_DB {
 		$r['no_found_rows'] = true;
 
 		$get_posts = new WP_Query;
-		return $get_posts->query($r);
-	}
+		$post_results = $get_posts->query($r);
 
-	public function get_guides($route, $permissions, $users) {
-		return [
-			[
-				"title" => "titsle",
-				"steps" => [
-					[
-						"selector" => '.section-header',
-						"content"  => '<div> WIZARDS</div>'
-					],
-					[
-						"selector" => '.breadcrumbs',
-						"content"  => '<div> WIZARDS EVERYWHERE </div>'
-					]
-				]
-			]
-		];
+		if ($with_meta) {
+			foreach ($post_results as &$post) {
+				$post->meta = get_post_meta($post->ID);
+			}
+		}
+
+		return $post_results;
 	}
 
 }

@@ -71,7 +71,10 @@ class Yoda_WP_API {
 	 * @since    1.0.0
 	 */
 	public function get_guides ( WP_REST_Request $request ) {
-		return $this->db->get_guides('/', [], []);
+		$query_params = $request->get_query_params();
+
+		$use_dummy_data = isset($query_params['dummy']) ? (bool)$query_params['dummy'] : false;
+		return $this->db->get_guides('/', [], [], $use_dummy_data);
 	}
 
 }
