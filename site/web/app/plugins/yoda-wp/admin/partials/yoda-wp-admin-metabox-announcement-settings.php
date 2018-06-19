@@ -2,11 +2,10 @@
 /**
  * Provide the view for a metabox
  *
- * @link        http://slushman.com
  * @since       1.0.0
  *
- * @package     Now_Hiring
- * @subpackage  Now_Hiring/admin/partials
+ * @package     Yoda_WP
+ * @subpackage  Yoda_WP/admin/partials
  */
 global $post;
 if ( empty( $post ) ) { return; }

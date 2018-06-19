@@ -32,7 +32,7 @@ class Yoda_WP_Activator {
 	public static function activate() {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-yoda-wp-admin.php';
         Yoda_WP_Admin::new_cpt_announcement();
-        //Yoda_WP_Admin::new_cpt_wizard();
+        Yoda_WP_Admin::new_cpt_wizard();
         flush_rewrite_rules();
 	}
 
