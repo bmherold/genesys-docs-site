@@ -12,7 +12,7 @@ if ( empty( $post ) ) { return; }
 if ( 'announcement' != $post->post_type ) { return; }
 $this->meta = get_post_custom( $post->ID );
 
-wp_nonce_field( $this->plugin_name, 'announcement_settings' );
+wp_nonce_field( $this->plugin_name, 'announcement-settings' );
 
 $atts                   = array();
 $atts['class']          = 'widefat';

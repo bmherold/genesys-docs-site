@@ -41,12 +41,15 @@ $setatts['fields'][$i]['text']['placeholder']           = '#id-of-element';
 $setatts['fields'][$i]['text']['type']                  = 'text';
 $setatts['fields'][$i]['text']['value']                 = '';
 $i++;
-$setatts['fields'][$i]['editor']['description']           = '';
-$setatts['fields'][$i]['editor']['id']                    = 'step-content';
-$setatts['fields'][$i]['editor']['name']                  = 'step-content';
-$setatts['fields'][$i]['editor']['label']                 = 'Step Content';
-$setatts['fields'][$i]['editor']['settings']['textarea_name'] = 'step-content';
-$setatts['fields'][$i]['editor']['value']                 = '';
+$setatts['fields'][$i]['editor']['description']    = '';
+$setatts['fields'][$i]['editor']['id']             = 'stepContent';
+$setatts['fields'][$i]['editor']['name']             = 'stepContent';
+$setatts['fields'][$i]['editor']['label']          = 'Content';
+$setatts['fields'][$i]['editor']['settings']['textarea_name'] = 'stepContent';
+$setatts['fields'][$i]['editor']['settings']['tinymce'] = false;
+$setatts['fields'][$i]['editor']['settings']['quicktags'] = true;
+$setatts['fields'][$i]['editor']['value']          = '';
+
 $i++;
 
 apply_filters( $this->plugin_name . '-field-repeater-wizard-steps', $setatts );

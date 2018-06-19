@@ -247,7 +247,7 @@ class Yoda_WP_Admin {
 	public function cpt_announcement_save( $post_id, $object ) {
 		if ( 'announcement' !== $object->post_type ) { return $post_id; }
 
-		$nonces = array('announcement_settings');
+		$nonces = array('announcement-settings');
 
 		$fields = array();
 		$fields[] = array('announcement-url', 'text');
@@ -402,7 +402,7 @@ class Yoda_WP_Admin {
     public function cpt_wizard_save( $post_id, $object ) {
         if ( 'wizard' !== $object->post_type ) { return $post_id; }
 
-        $nonces = array('wizard-settings', 'wizard-steps');
+        $nonces = array('wizard-settings', 'wizard-steps-repeater');
 
         $fields = array();
         $fields[] = array('wizard-url', 'text');
@@ -411,7 +411,7 @@ class Yoda_WP_Admin {
         $fields[] = array('wizard-steps-repeater', 'repeater', array(
             array( 'step-title', 'text' ),
             array( 'step-selector', 'text' ),
-            array( 'step-content', 'editor')
+            array( 'stepContent', 'editor')
         ) );
 
         $this->validate_meta( $_POST, $post_id, $object, $nonces, $fields);
@@ -468,7 +468,7 @@ class Yoda_WP_Admin {
 			$type = $meta[1];
 			if ( 'repeater' === $type && is_array( $meta[2] ) ) {
 				$clean = array();
-				foreach ( $meta[2] as $field ) {
+				foreach ( $meta[2] as $i => $field ) {
 					foreach ( $posted[$field[0]] as $data ) {
 						if ( empty( $data ) ) { continue; }
 						$clean[$field[0]][] = $this->sanitizer( $field[1], $data );

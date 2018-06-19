@@ -12,7 +12,7 @@
  * @package    Yoda_WP
  * @subpackage Yoda_WP/admin/partials
  */
-//echo '<pre>'; print_r( $repeater ); echo '</pre>';
+echo '<pre>'; print_r( $repeater ); echo '</pre>';
 ?><ul class="repeaters"><?php
     for ( $i = 0; $i <= $count; $i++ ) {
         if ( $i === $count ) {
@@ -36,8 +36,13 @@
                             if ( ! empty( $repeater ) && ! empty( $repeater[$i][$atts['id']] ) ) {
                                 $atts['value'] = $repeater[$i][$atts['id']];
                             }
-                            $atts['id']     .= '[]';
+                            if ( 'editor' !== $type) {
+                                $atts['id']     .= '[]';
+                            } else {
+                                $atts['settings']['textarea_name']  .= '[]';
+                            }
                             $atts['name']   .= '[]';
+
                             ?><p class="wrap-field"><?php
                             include( plugin_dir_path( __FILE__ ) . $this->plugin_name . '-admin-field-' . $type . '.php' );
                             ?></p><?php

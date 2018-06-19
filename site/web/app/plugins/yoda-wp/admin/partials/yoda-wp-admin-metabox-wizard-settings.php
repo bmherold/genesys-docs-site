@@ -12,7 +12,7 @@ if ( empty( $post ) ) { return; }
 if ( 'wizard' != $post->post_type ) { return; }
 $this->meta = get_post_custom( $post->ID );
 
-wp_nonce_field( $this->plugin_name, 'wizard_settings' );
+wp_nonce_field( $this->plugin_name, 'wizard-settings' );
 
 $atts                   = array();
 $atts['class']          = 'widefat';
