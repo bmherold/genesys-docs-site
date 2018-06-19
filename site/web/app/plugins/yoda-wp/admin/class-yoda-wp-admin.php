@@ -112,6 +112,8 @@ class Yoda_WP_Admin {
         return $return;
     }
 
+    // --------------------------- ANNOUNCEMENTS -------------------------------------
+
 	/**
 	 * Creates a new custom post type
 	 *
@@ -245,15 +247,178 @@ class Yoda_WP_Admin {
 	public function cpt_announcement_save( $post_id, $object ) {
 		if ( 'announcement' !== $object->post_type ) { return $post_id; }
 
-		$noncesCheck = isset( $_POST['announcement_settings'] ) && wp_verify_nonce( $_POST['announcement_settings'], $this->plugin_name );
+		$nonces = array('announcement_settings');
 
 		$fields = array();
 		$fields[] = array('announcement-url', 'text');
 		$fields[] = array('announcement-permissions', 'text');
 		$fields[] = array('announcement-show-once', 'checkbox');
 
-		$this->validate_meta( $_POST, $post_id, $object, $noncesCheck, $fields);
+		$this->validate_meta( $_POST, $post_id, $object, $nonces, $fields);
 	}
+
+    // --------------------------- WIZARDS -------------------------------------
+
+    /**
+     * Creates a new custom post type
+     *
+     * @since   1.0.0
+     * @access  public
+     * @uses    register_post_type()
+     */
+    public static function new_cpt_wizard() {
+        $labels = array(
+            'name'               => _x( 'Wizards', 'post type general name', 'yoda-wp' ),
+            'singular_name'      => _x( 'Wizard', 'post type singular name', 'yoda-wp' ),
+            'menu_name'          => _x( 'Wizards', 'admin menu', 'yoda-wp' ),
+            'name_admin_bar'     => _x( 'Wizard', 'add new on admin bar', 'yoda-wp' ),
+            'add_new'            => _x( 'Add New', 'wizard', 'yoda-wp' ),
+            'add_new_item'       => __( 'Add New Wizard', 'yoda-wp' ),
+            'new_item'           => __( 'New Wizard', 'yoda-wp' ),
+            'edit_item'          => __( 'Edit Wizard', 'yoda-wp' ),
+            'view_item'          => __( 'View Wizard', 'yoda-wp' ),
+            'all_items'          => __( 'All Wizards', 'yoda-wp' ),
+            'search_items'       => __( 'Search Wizards', 'yoda-wp' ),
+            'parent_item_colon'  => __( 'Parent Wizards:', 'yoda-wp' ),
+            'not_found'          => __( 'No wizards found.', 'yoda-wp' ),
+            'not_found_in_trash' => __( 'No wizards found in Trash.', 'yoda-wp' )
+        );
+
+        $args = array(
+            'labels'             => $labels,
+            'description'        => __( 'Description.', 'yoda-wp' ),
+            'public'             => true,
+            'publicly_queryable' => false,
+            'exclude_from_search'=> true,
+            'show_ui'            => true,
+            'show_in_menu'       => true,
+            'show_in_rest'       => true,
+            'show_in_admin_bar'  => true,
+            'query_var'          => true,
+            'rewrite'            => array( 'slug' => 'wizard' ),
+            'capability_type'    => 'post',
+            'has_archive'        => false,
+            'hierarchical'       => false,
+            'menu_position'      => 5,
+            'supports'           => array( 'title', 'revisions' )
+        );
+
+        register_post_type( 'wizard', $args );
+    }
+
+    /**
+     * Announcement CPT update messages.
+     *
+     * See /wp-admin/edit-form-advanced.php
+     *
+     * @param array $messages Existing post update messages.
+     *
+     * @return array Amended post update messages with new CPT update messages.
+     */
+    function cpt_wizard_updated_messages( $messages ) {
+        $post             = get_post();
+        $post_type        = get_post_type( $post );
+        $post_type_object = get_post_type_object( $post_type );
+
+        $messages['wizard'] = array(
+            0  => '', // Unused. Messages start at index 1.
+            1  => __( 'Wizard updated.', 'yoda-wp' ),
+            2  => __( 'Custom field updated.', 'yoda-wp' ),
+            3  => __( 'Custom field deleted.', 'yoda-wp' ),
+            4  => __( 'Wizard updated.', 'yoda-wp' ),
+            /* translators: %s: date and time of the revision */
+            5  => isset( $_GET['revision'] ) ? sprintf( __( 'Wizard restored to revision from %s', 'yoda-wp' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+            6  => __( 'Wizard published.', 'yoda-wp' ),
+            7  => __( 'Wizard saved.', 'yoda-wp' ),
+            8  => __( 'Wizard submitted.', 'yoda-wp' ),
+            9  => sprintf(
+                __( 'Wizard scheduled for: <strong>%1$s</strong>.', 'yoda-wp' ),
+                // translators: Publish box date format, see http://php.net/date
+                date_i18n( __( 'M j, Y @ G:i', 'yoda-wp' ), strtotime( $post->post_date ) )
+            ),
+            10 => __( 'Wizard draft updated.', 'yoda-wp' )
+        );
+
+        if ( $post_type_object->publicly_queryable && 'wizard' === $post_type ) {
+            $permalink = get_permalink( $post->ID );
+
+            $view_link = sprintf( ' <a href="%s">%s</a>', esc_url( $permalink ), __( 'View wizard', 'yoda-wp' ) );
+            $messages[ $post_type ][1] .= $view_link;
+            $messages[ $post_type ][6] .= $view_link;
+            $messages[ $post_type ][9] .= $view_link;
+
+            $preview_permalink = add_query_arg( 'preview', 'true', $permalink );
+            $preview_link = sprintf( ' <a target="_blank" href="%s">%s</a>', esc_url( $preview_permalink ), __( 'Preview wizard', 'yoda-wp' ) );
+            $messages[ $post_type ][8]  .= $preview_link;
+            $messages[ $post_type ][10] .= $preview_link;
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Registers metaboxes with WordPress
+     *
+     * @param Object $post Existing post object.
+     *
+     * @since   1.0.0
+     * @access  public
+     */
+    public function cpt_wizard_add_metaboxes( $post ) {
+        /* add_meta_box(
+            string $id,
+            string $title,
+            callable $callback,
+            string|array|WP_Screen $screen = null,
+            string $context = 'advanced',
+            string $priority = 'default',
+            array $callback_args = null )
+        */
+
+        add_meta_box(
+            'wizard_settings',
+            apply_filters( $this->plugin_name . '-metabox-wizard-settings', esc_html__( 'Settings', 'yoda-wp' ) ),
+            array( $this, 'metabox' ),
+            'wizard',
+            'side',
+            'default',
+            array(
+                'file' => 'wizard-settings'
+            )
+        );
+        add_meta_box(
+            'wizard_steps',
+            apply_filters( $this->plugin_name . '-metabox-wizard-steps', esc_html__( 'Steps', 'yoda-wp' ) ),
+            array( $this, 'metabox' ),
+            'wizard',
+            'advanced',
+            'high',
+            array(
+                'file' => 'wizard-steps'
+            )
+        );
+    }
+
+    public function cpt_wizard_save( $post_id, $object ) {
+        if ( 'wizard' !== $object->post_type ) { return $post_id; }
+
+        $nonces = array('wizard-settings', 'wizard-steps');
+
+        $fields = array();
+        $fields[] = array('wizard-url', 'text');
+        $fields[] = array('wizard-permissions', 'text');
+        $fields[] = array('wizard-show-once', 'checkbox');
+        $fields[] = array('wizard-steps-repeater', 'repeater', array(
+            array( 'step-title', 'text' ),
+            array( 'step-selector', 'text' ),
+            array( 'step-content', 'editor')
+        ) );
+
+        $this->validate_meta( $_POST, $post_id, $object, $nonces, $fields);
+    }
+
+
+    // ------------------------- Metaboxes --------------------------------
 
 	/**
 	 * Calls a metabox file specified in the add_meta_box args.
@@ -288,12 +453,15 @@ class Yoda_WP_Admin {
 	 * @param 	object 		$object 		The post object
 	 * @return 	void
 	 */
-	public function validate_meta( $post, $post_id, $object, $noncesCheck, $fields ) {
+	public function validate_meta( $posted, $post_id, $object, $nonces, $fields ) {
 		//wp_die( '<pre>' . print_r( $_POST ) . '</pre>' );
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) { return $post_id; }
 		if ( ! current_user_can( 'edit_post', $post_id ) ) { return $post_id; }
 
-		if ( ! $noncesCheck ) { return $post_id; }
+        foreach ( $nonces as $nonce ) {
+            if ( ! isset( $posted[$nonce] ) ) { return $post_id; }
+            if ( isset( $posted[$nonce] ) && ! wp_verify_nonce( $posted[$nonce], $this->plugin_name ) ) { return $post_id; }
+        }
 
 		foreach ( $fields as $meta ) {
 			$name = $meta[0];
@@ -301,7 +469,7 @@ class Yoda_WP_Admin {
 			if ( 'repeater' === $type && is_array( $meta[2] ) ) {
 				$clean = array();
 				foreach ( $meta[2] as $field ) {
-					foreach ( $post[$field[0]] as $data ) {
+					foreach ( $posted[$field[0]] as $data ) {
 						if ( empty( $data ) ) { continue; }
 						$clean[$field[0]][] = $this->sanitizer( $field[1], $data );
 					} // foreach
@@ -314,7 +482,7 @@ class Yoda_WP_Admin {
 					} // foreach $clean
 				} // for
 			} else {
-				$new_value = $this->sanitizer( $type, $post[$name] );
+				$new_value = $this->sanitizer( $type, $posted[$name] );
 			}
 			update_post_meta( $post_id, $name, $new_value );
 		} // foreach
