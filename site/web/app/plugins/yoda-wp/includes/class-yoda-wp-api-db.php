@@ -83,8 +83,8 @@ class Yoda_WP_API_DB {
 				case 'announcement':
 					return [
 						'id' => $x['ID'],
-						'title' => $x['post_title'],
 						'steps' => [[
+							'title' => $x['post_title'],
 							'selector' => current($x['meta']['announcement-url']),
 							'content' => $x['post_content'],
 							]],
@@ -96,16 +96,23 @@ class Yoda_WP_API_DB {
 					break;
 
 					case 'wizard':
-					return [
-						'id' => $x['ID'],
-						'title' => $x['post_title'],
-						'steps' => [],
-						'type' => $x['post_type'],
-						'created' => $x['post_date'],
-						'updated' => $x['post_modified'],
-					];
+						$steps = unserialize(current($x['meta']['wizard-steps-repeater']));
+						return [
+							'id' => $x['ID'],
+							'title' => $x['post_title'],
+							'steps' => array_map(function($s) {
+								return [
+									'title' => $s['step-title'],
+									'selector' => $s['step-selector'],
+									'content' => $s['stepContent'],
+								];
+							}, $steps),
+							'type' => $x['post_type'],
+							'created' => $x['post_date'],
+							'updated' => $x['post_modified'],
+						];
 
-					break;
+						break;
 
 				default:
 					return $x;
