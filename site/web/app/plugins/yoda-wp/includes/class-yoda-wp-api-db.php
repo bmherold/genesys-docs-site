@@ -33,36 +33,45 @@ class Yoda_WP_API_DB {
 			return $this->getDummyGuideData();
 		}
 
-		$announcements = $this->getAnnouncements();
-		// return $announcements;
+		// $announcements = $this->getAnnouncements($route, $permissions, $users);
+		// // return $announcements;
 
-		$wizards = $this->getWizards();
-		// return $wizards;
+		// $wizards = $this->getWizards($route, $permissions, $users);
+		// // return $wizards;
 
-		return array_merge($announcements, $wizards);
-	}
+		// return array_merge($announcements, $wizards);
 
-	private function getAnnouncements() {
-		$announcements =  $this->queryPosts([
-			'post_type' => 'announcement',
+		$guides = $this->queryPosts([
+			'post_type' => ['announcement', 'wizard'],
 			'post_status' => 'publish',
+			'orderby' => 'ID',
+			'order' => 'ASC',
 		], true);
 
-		// return $announcements;
-
-		return $this->filterPosts($announcements);
+		return $this->filterPosts($guides);
 	}
 
-	private function getWizards() {
-		$wizards =  $this->queryPosts([
-			'post_type' => 'wizard',
-			'post_status' => 'publish',
-		], true);
+	// private function getAnnouncements() {
+	// 	$announcements =  $this->queryPosts([
+	// 		'post_type' => 'announcement',
+	// 		'post_status' => 'publish',
+	// 	], true);
 
-		// return $wizards;
+	// 	// return $announcements;
 
-		return $this->filterPosts($wizards);
-	}
+	// 	return $this->filterPosts($announcements);
+	// }
+
+	// private function getWizards() {
+	// 	$wizards =  $this->queryPosts([
+	// 		'post_type' => 'wizard',
+	// 		'post_status' => 'publish',
+	// 	], true);
+
+	// 	// return $wizards;
+
+	// 	return $this->filterPosts($wizards);
+	// }
 
 	private function filterPosts($posts) {
 		// error_log(print_r($posts,true));
@@ -73,20 +82,22 @@ class Yoda_WP_API_DB {
 			switch ($x['post_type']) {
 				case 'announcement':
 					return [
+						'id' => $x['ID'],
 						'title' => $x['post_title'],
 						'steps' => [[
 							'selector' => current($x['meta']['announcement-url']),
 							'content' => $x['post_content'],
-						]],
-						'type' => $x['post_type'],
-						'created' => $x['post_date'],
+							]],
+							'type' => $x['post_type'],
+							'created' => $x['post_date'],
 						'updated' => $x['post_modified'],
 					];
 
 					break;
 
-				case 'wizard':
+					case 'wizard':
 					return [
+						'id' => $x['ID'],
 						'title' => $x['post_title'],
 						'steps' => [],
 						'type' => $x['post_type'],
