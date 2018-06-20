@@ -22,15 +22,16 @@
  */
 class Yoda_WP_Activator {
 
-	/*
+    /*
      *
      * Declare custom post types, taxonomies, and plugin settings
      * Flushes rewrite rules afterwards
      *
      * @since       1.0.0
      */
-	public static function activate() {
+    public static function activate() {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-yoda-wp-admin.php';
+        Yoda_WP_Admin::createTables();
         Yoda_WP_Admin::new_cpt_announcement();
         Yoda_WP_Admin::new_cpt_wizard();
         flush_rewrite_rules();

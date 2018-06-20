@@ -21,7 +21,11 @@
 class Yoda_WP_API_DB {
 
 	public function __construct() {
+		$this->load_dependencies();
+	}
 
+	private function load_dependencies() {
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-yoda-wp-admin.php';
 	}
 
 	public function get_posts() {
@@ -72,6 +76,49 @@ class Yoda_WP_API_DB {
 
 	// 	return $this->filterPosts($wizards);
 	// }
+
+	public function getGuide($guide_id) {
+		error_log('[finding guide ' . $guide_id.']');
+		$guide = get_post($guide_id);
+		error_log('-------------------------');
+		error_log(print_r($guide, true));
+
+		if ($guide) {
+			return $guide;
+		} else {
+			return false;
+		}
+	}
+
+	public function markGuideComplete($guide_id, $user_id) {
+		error_log('user_id ' . $user_id);
+		global $wpdb;
+
+		$table_guides_completed = $wpdb->prefix . Yoda_WP_Admin::TABLE_GUIDES_COMPLETED;
+
+		$record = $wpdb->get_row( "SELECT * FROM $table_guides_completed WHERE guide_id = $guide_id and user_id = '$user_id'", ARRAY_A );
+
+		error_log(print_r($record, true));
+
+		if ($record) {
+			error_log('GUIDE ALREADY COMPLETE');
+			return $record;
+		} else {
+			error_log("INSERTING GUIDE with $user_id");
+			$wpdb->insert(
+				$table_guides_completed,
+				[
+					'guide_id' => $guide_id,
+					'user_id' => $user_id,
+					'completed_on' => current_time( 'mysql' )
+				],
+				[	'%d',	'%s', '%s' ]
+			);
+
+			return $wpdb->get_row( "SELECT * FROM $table_guides_completed WHERE id = {$wpdb->insert_id}", ARRAY_A );
+		}
+
+	}
 
 	private function filterPosts($posts) {
 		// error_log(print_r($posts,true));

@@ -110,11 +110,42 @@ class Yoda_WP_Admin {
         $return = $sanitizer->clean();
         unset( $sanitizer );
         return $return;
-    }
+		}
 
-    // --------------------------- ANNOUNCEMENTS -------------------------------------
 
-	/**
+
+		public const TABLE_GUIDES_COMPLETED = 'yoda_guides_completed';
+
+		/**
+		 * Create Yoda Tables
+		 *
+		 * @since 	1.0.0
+		 * @access 	public
+		 */
+		public static function createTables() {
+			global $wpdb;
+
+			$charset_collate = $wpdb->get_charset_collate();
+
+			$table_name = $wpdb->prefix . self::TABLE_GUIDES_COMPLETED;
+
+			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+				$sql = "CREATE TABLE $table_name (
+					id mediumint(9) NOT NULL AUTO_INCREMENT,
+					guide_id mediumint(9) NOT NULL,
+					user_id varchar(100) NOT NULL,
+					completed_on datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+					PRIMARY KEY  (id)
+				) $charset_collate;";
+
+				require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+				dbDelta( $sql );
+			}
+		}
+
+// --------------------------- ANNOUNCEMENTS -------------------------------------
+
+/**
 	 * Creates a new custom post type
 	 *
 	 * @since 	1.0.0

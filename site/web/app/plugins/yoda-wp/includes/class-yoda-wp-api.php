@@ -77,4 +77,28 @@ class Yoda_WP_API {
 		return $this->db->get_guides('/', [], [], $use_dummy_data);
 	}
 
+	/**
+	 * Updates a particular guide with metadata.
+	 *
+	 * @since    1.0.0
+	 */
+	public function update_guide ( WP_REST_Request $request ) {
+		$guide_id = $request->get_param( 'id' );
+		$post_data = $request->get_json_params();
+
+		if (!isset($post_data['user_id']) || !$post_data['user_id']) {
+			return new WP_Error('yoda_wp__error_missing_user_id',__('Missing user_id'), ['status' => 400]);
+		}
+
+		$user_id = $post_data['user_id'];
+		$guide = $this->db->getGuide($guide_id);
+
+		if ($guide) {
+			return $guide_result = $this->db->markGuideComplete($guide_id, $user_id);
+		} else {
+			return new WP_Error('yoda_wp__error_guide_not_found',__('A guide with this id does not exist'), ['status' => 400]);
+		}
+
+	}
+
 }
