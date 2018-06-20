@@ -55,7 +55,7 @@ class Yoda_WP_API_Routes {
 		header("Access-Control-Allow-Methods: POST, PATCH, GET, OPTIONS, PUT, DELETE");
 		header("Access-Control-Allow-Credentials: true");
 		header("Access-Control-Allow-Headers: true");
-		header("Access-Control-Request-Headers: X-Custom-Header");
+		header("Access-Control-Request-Headers: Authorization");
 
 		if ( 'OPTIONS' == $_SERVER['REQUEST_METHOD'] ) {
 				status_header(200);
