@@ -32,18 +32,10 @@ class Yoda_WP_API_DB {
 		return $this->queryPosts(['post_type' => ['wizard', 'post', 'page', 'announcement']], true);
 	}
 
-	public function get_guides($route, $permissions, $user_id, $use_dummy_data = false) {
-		if ($use_dummy_data) {
+	public function get_guides($route, $permissions, $user_id, $locale, $use_dummy_data = false) {
+		if ($use_dummy_data == 'guides') {
 			return $this->getDummyGuideData();
 		}
-
-		// $announcements = $this->getAnnouncements($route, $permissions, $users);
-		// // return $announcements;
-
-		// $wizards = $this->getWizards($route, $permissions, $users);
-		// // return $wizards;
-
-		// return array_merge($announcements, $wizards);
 
 		$guides = $this->queryPosts([
 			'post_type' => ['announcement', 'wizard'],
@@ -52,41 +44,142 @@ class Yoda_WP_API_DB {
 			'order' => 'ASC',
 		], true);
 
-		// foreach($guides as $g) {
-		// 	error_log(print_r($g->meta, true));
-		// }
-
 		if ($user_id) {
-			error_log('FILTERING Completed GUIDES');
+			error_log('[Filtering Completed Guides]: for user_id: ' . $user_id);
 			$guides = $this->filterCompleteGuides($guides, $user_id);
-		} else {
-			error_log('NOT ----- FILTERING Completed GUIDES');
 		}
 
-		return $this->filterPosts($guides);
+		foreach($guides as $guide) {
+			$translations = self::getGuideAvailableTranslations($guide, (bool)$use_dummy_data);
+			$availableTranslations = $translations ? array_keys($translations) : 'none';
+			error_log('Guide "'.$guide->post_title.'" has these available translations: ' . print_r($availableTranslations, true));
+		}
+
+		$DEFAULT_LOCALE = 'en';
+		if ($locale != $DEFAULT_LOCALE) {
+			$guides = $this->translateGuides($guides, $locale, (bool)$use_dummy_data);
+		}
+
+		return $this->mapPostsToOutputSchema($guides);
+	}
+
+	public static function getGuideAvailableTranslations($guide, $use_dummy_data = false) {
+		$translationsMeta = $use_dummy_data ?
+		self::getDummyTranslationsMeta() : (isset($guide->meta['translations']) ? $guide->meta['translations'] : false);
+
+		if (!$translationsMeta) {
+			return false;
+		}
+
+		return unserialize(current($translationsMeta));
+	}
+
+	private function translateGuides($guides, $locale, $use_dummy_data = false) {
+		error_log("[Translating Guides]: to '$locale'");
+		if ($use_dummy_data) { error_log("-------------- WITH DUMMY TRANSLATIONS DATA --------------"); }
+		$locale = strtolower($locale);
+		$translatedGuides = array();
+
+		foreach($guides as $guide) {
+			error_log("[Translating Guide]: " . $guide->post_title);
+
+			$translations = self::getGuideAvailableTranslations($guide, $use_dummy_data);
+			$localeData = ($translations && $translations[$locale]) ? $translations[$locale] : false;
+			if (!$localeData) {
+				error_log("- skipping translation, missing desired locale");
+				$translatedGuides[] = $guide;
+				continue; // break if we don't have the requested translations data
+			}
+
+			error_log("- translated");
+			$translatedGuides[] = $this->translateGuide($guide, $localeData);
+		}
+
+		return $translatedGuides;
+	}
+
+	private static function getDummyTranslationsMeta() {
+		$translations = [
+			"es" => [
+				"TITLE" => "My SWEET Title (spanish)",
+				"STEPS" => [
+					"1" => [
+						"TITLE" => "Step 1 title (spanish)",
+						"CONTENT" => "Step 1 content (spanish)"
+					],
+					"2" => [
+						"TITLE" => "Step 2 title (spanish)",
+						"CONTENT" => "Step 2 content (spanish)"
+					],
+					"3" => [
+						"TITLE" => "Step 3 title (spanish)",
+						"CONTENT" => "Step 3 content (spanish)"
+					]
+				]
+			]
+		];
+
+		return [maybe_serialize($translations)]; // make it look like wordpress serialized metadata
+	}
+
+	private function translateGuide($guide, $localeData) {
+		// error_log("translateGuide() --------------");
+		// error_log(print_r($guide, true));
+		// error_log(print_r($localeData, true));
+
+		switch ($guide->post_type) {
+			case 'announcement':
+				$guide->post_title = $localeData['TITLE']; // will be same as $localeData['STEPS']['1']['CONTENT'] for announcements
+				$guide->post_content = $localeData['STEPS']['1']['CONTENT'];
+				// error_log('TRANSLATED: ' . print_r($guide, true));
+				break;
+
+				case 'wizard':
+					$steps = unserialize(current($guide->meta['wizard-steps-repeater']));
+					// error_log('-------------------[steps]:' . print_r($steps, true));
+
+					$translatedSteps = array_map(function($step, $i) use ($localeData) {
+						// error_log('-----------current step:' . print_r($step, true));
+						$stepIdx = $i + 1;
+
+						return array_merge($step, [
+							'step-title' => isset($localeData['STEPS']["$stepIdx"]["TITLE"]) ?
+								$localeData['STEPS']["$stepIdx"]["TITLE"] : (isset($step['step-title']) ? $step['step-title'] : ''),
+							'stepContent' => isset($localeData['STEPS']["$stepIdx"]["CONTENT"]) ?
+								$localeData['STEPS']["$stepIdx"]["CONTENT"] : $step['stepContent'],
+						]);
+					}, $steps, array_keys($steps));
+
+					$guide->post_title = $localeData['TITLE'];
+					$guide->meta['wizard-steps-repeater'] = [maybe_serialize($translatedSteps)]; // wrap element in array for
+					// error_log('TRANSLATED: ' . print_r($guide, true));
+					break;
+		}
+
+		return $guide;
 	}
 
 	private function filterCompleteGuides($guides, $user_id) {
 		global $wpdb;
 		$table_guides_completed = $wpdb->prefix . Yoda_WP_Admin::TABLE_GUIDES_COMPLETED;
 
-		$guide_ids = $wpdb->get_col( $wpdb->prepare(
+		$completed_guide_ids = $wpdb->get_col( $wpdb->prepare(
 			"
-			SELECT      guide_id
-			FROM        $table_guides_completed
-			WHERE       user_id = %s
+				SELECT      guide_id
+				FROM        $table_guides_completed
+				WHERE       user_id = %s
 			",
 			$user_id
 		) );
 
-		error_log('COMPLETED GUIDE IDS: ' . print_r($guide_ids, true));
+		error_log('COMPLETED GUIDE IDS: ' . print_r($completed_guide_ids, true));
 
-		$filtered_guides = array_filter($guides, function($guide) use ($guide_ids) {
+		$filtered_guides = array_filter($guides, function($guide) use ($completed_guide_ids) {
 			$is_show_once = $this->getGuideShowOnceValue($guide);
 			if (!$is_show_once) {
 				return true;
 			} else {
-				return !in_array($guide->ID, $guide_ids);
+				return !in_array($guide->ID, $completed_guide_ids);
 			}
 		});
 
@@ -120,28 +213,6 @@ class Yoda_WP_API_DB {
 				break;
 		}
 	}
-
-	// private function getAnnouncements() {
-	// 	$announcements =  $this->queryPosts([
-	// 		'post_type' => 'announcement',
-	// 		'post_status' => 'publish',
-	// 	], true);
-
-	// 	// return $announcements;
-
-	// 	return $this->filterPosts($announcements);
-	// }
-
-	// private function getWizards() {
-	// 	$wizards =  $this->queryPosts([
-	// 		'post_type' => 'wizard',
-	// 		'post_status' => 'publish',
-	// 	], true);
-
-	// 	// return $wizards;
-
-	// 	return $this->filterPosts($wizards);
-	// }
 
 	public function getGuide($guide_id) {
 		error_log('[finding guide ' . $guide_id.']');
@@ -186,9 +257,7 @@ class Yoda_WP_API_DB {
 
 	}
 
-
-
-	private function filterPosts($posts) {
+	private function mapPostsToOutputSchema($posts) {
 		// error_log(print_r($posts,true));
 
 		return array_map(function($x) {
@@ -198,6 +267,7 @@ class Yoda_WP_API_DB {
 				case 'announcement':
 					return [
 						'id' => $x['ID'],
+						'title' => $x['post_title'],
 						'steps' => [[
 							'title' => $x['post_title'],
 							'selector' => isset($x['meta']['announcement-selector']) ? current($x['meta']['announcement-selector']) : '',
