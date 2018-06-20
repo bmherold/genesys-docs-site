@@ -1,5 +1,5 @@
 /**
- * Repeaters
+ * Repeaters and iFramed in Dialogue
  */
 (function( $ ) {
 	'use strict';
@@ -86,5 +86,85 @@
 			opacity: 0.6,
 		});
 	});
+
+  /**
+   * Dialogue for Iframe!
+   */
+  $('#dialog-for-iframe').dialog({
+    title: 'My Dialog',
+    dialogClass: 'wp-dialog',
+    autoOpen: false,
+    draggable: false,
+    width: 'auto',
+    modal: true,
+    resizable: false,
+    closeOnEscape: true,
+    position: {
+      my: "center",
+      at: "center",
+      of: window
+    },
+    buttons: [
+      {
+        id: 'selection-mode',
+        text: 'Select Element',
+        click: function() {
+          // send PM to iFrame - yodaMessage: 'select-mode'
+          var message = { 'yodaMessage': 'select-mode' };
+          $('#iframe-for-element-selection')[0].contentWindow.postMessage(message, '*');
+        }
+      },
+      {
+        id: 'save-selection',
+        text: 'Use Selected Element',
+        click: function() {
+          $('#dialog-for-iframe').dialog('close');
+        }
+      }
+    ],
+    open: function () {
+      // close dialog by clicking the overlay behind it
+      $('.ui-widget-overlay').bind('click', function(){
+        $('#dialog-for-iframe').dialog('close');
+      });
+      // disable selection button
+      $('#selection-mode').prop("disabled", true).addClass("ui-state-disabled");
+
+      // get URL for iFrame and set it
+      $('#iframe-for-element-selection').attr('src', $('#url-for-iframe').val());
+
+      // wait for PostMessage from iFrame - yodaMessage: 'iframe-ready'
+      let handle = function(event) {
+        console.log(' ********* POST MESSAGE EVENT', event);
+        var { source, data } = event.originalEvent;
+        if ( data.yodaMessage ) {
+          if ( data.yodaMessage === 'iframe-ready' ) {
+            console.log(' ********* POST MESSAGE!!!!!', data);
+            $('#selection-mode').prop("disabled", false).removeClass("ui-state-disabled");
+            $('#save-selection').prop("disabled", true).addClass("ui-state-disabled");
+          } else if ( data.yodaMessage === 'return-selector' ) {
+            console.log(' ********* POST MESSAGE!!!!!', data);
+            $('#save-selection').prop("disabled", false).removeClass("ui-state-disabled");
+            $('.element-selection-mode').val( data.yodaMessageSelector );
+          }
+        }
+      }
+      $(window).on("message", handle);
+    },
+    create: function () {
+      // style fix for WordPress admin
+      $('.ui-dialog-titlebar-close').addClass('ui-button');
+    },
+    close: function( event, ui ) {
+      // nothing, everything already set!
+      $(window).off('message');
+    }
+  });
+  // bind a button or a link to open the dialog
+  $('.element-selection-mode').click(function(e) {
+    e.preventDefault();
+    $('#dialog-for-iframe').dialog('open');
+  });
+
 
 })( jQuery );

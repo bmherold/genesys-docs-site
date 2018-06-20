@@ -73,7 +73,7 @@ class Yoda_WP_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/yoda-wp-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/yoda-wp-admin.css', array('wp-jquery-ui-dialog'), $this->version, 'all' );
 
 	}
 
@@ -96,7 +96,7 @@ class Yoda_WP_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/yoda-wp-admin.js', array( 'jquery', 'jquery-ui-sortable' ), $this->version, true );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/yoda-wp-admin.js', array( 'jquery', 'jquery-ui-sortable', 'jquery-ui-dialog' ), $this->version, true );
 
 	}
 
