@@ -86,7 +86,7 @@ class Yoda_WP_API_DB {
 						'steps' => [[
 							'title' => $x['post_title'],
 							'selector' => isset($x['meta']['announcement-selector']) ? current($x['meta']['announcement-selector']) : '',
-							'content' => $x['post_content'],
+							'content' => isset($x['post_content']) ? $x['post_content'] : '',
 							]],
 							'type' => $x['post_type'],
 							'created' => $x['post_date'],
@@ -102,9 +102,9 @@ class Yoda_WP_API_DB {
 							'title' => $x['post_title'],
 							'steps' => array_map(function($s) {
 								return [
-									'title' => $s['step-title'],
+									'title' => isset($s['step-title']) ? $s['step-title'] : '',
 									'selector' => $s['step-selector'],
-									'content' => $s['stepContent'],
+									'content' => isset($s['stepContent']) ? $s['stepContent'] : '',
 								];
 							}, $steps),
 							'type' => $x['post_type'],
