@@ -108,12 +108,12 @@ class Yoda_WP_API_DB {
 				return false;
 				break;
 
-				case 'wizard':
-					if (isset($guide['meta']['wizard-show-once'])) {
-						return current($guide['meta']['wizard-show-once']);
-					}
-					return false;
-					break;
+			case 'wizard':
+				if (isset($guide['meta']['wizard-show-once'])) {
+					return current($guide['meta']['wizard-show-once']);
+				}
+				return false;
+				break;
 
 			default:
 				return false;

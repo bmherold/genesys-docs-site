@@ -69,10 +69,6 @@ class Yoda_WP_API_Routes {
 	 * @since    1.0.0
 	 */
 	public function rest_api_init () {
-		// $origin = 'http://www.test-cors.org';
-		// header( 'Access-Control-Allow-Origin: ' . esc_url_raw( $origin ) );
-		// header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
-		// header( 'Access-Control-Allow-Credentials: true' );
 
 		register_rest_route('api/v1', '/test/(?P<value>.*)', array(
 			'methods' => 'GET',
