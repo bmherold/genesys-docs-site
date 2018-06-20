@@ -54,6 +54,7 @@ class Yoda_WP_API_Routes {
 		header("Access-Control-Allow-Origin: " . get_http_origin()); // TODO - dont allow everywhere!
 		header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
 		header("Access-Control-Allow-Credentials: true");
+		header("Access-Control-Allow-Headers: true");
 
 		if ( 'OPTIONS' == $_SERVER['REQUEST_METHOD'] ) {
 				status_header(200);
