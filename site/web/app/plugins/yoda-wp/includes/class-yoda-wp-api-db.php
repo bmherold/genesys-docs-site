@@ -32,7 +32,7 @@ class Yoda_WP_API_DB {
 		return $this->queryPosts(['post_type' => ['wizard', 'post', 'page', 'announcement']], true);
 	}
 
-	public function get_guides($route, $permissions, $users, $use_dummy_data = false) {
+	public function get_guides($route, $permissions, $user_id, $use_dummy_data = false) {
 		if ($use_dummy_data) {
 			return $this->getDummyGuideData();
 		}
@@ -52,7 +52,73 @@ class Yoda_WP_API_DB {
 			'order' => 'ASC',
 		], true);
 
+		// foreach($guides as $g) {
+		// 	error_log(print_r($g->meta, true));
+		// }
+
+		if ($user_id) {
+			error_log('FILTERING Completed GUIDES');
+			$guides = $this->filterCompleteGuides($guides, $user_id);
+		} else {
+			error_log('NOT ----- FILTERING Completed GUIDES');
+		}
+
 		return $this->filterPosts($guides);
+	}
+
+	private function filterCompleteGuides($guides, $user_id) {
+		global $wpdb;
+		$table_guides_completed = $wpdb->prefix . Yoda_WP_Admin::TABLE_GUIDES_COMPLETED;
+
+		$guide_ids = $wpdb->get_col( $wpdb->prepare(
+			"
+			SELECT      guide_id
+			FROM        $table_guides_completed
+			WHERE       user_id = %s
+			",
+			$user_id
+		) );
+
+		error_log('COMPLETED GUIDE IDS: ' . print_r($guide_ids, true));
+
+		$filtered_guides = array_filter($guides, function($guide) use ($guide_ids) {
+			$is_show_once = $this->getGuideShowOnceValue($guide);
+			if (!$is_show_once) {
+				return true;
+			} else {
+				return !in_array($guide->ID, $guide_ids);
+			}
+		});
+
+		$clean_array = array();
+		foreach($filtered_guides as $x) {
+			$clean_array[] = $x;
+		}
+
+		return $clean_array;
+	}
+
+	private function getGuideShowOnceValue($guide) {
+		$guide = $guide->to_array();
+		switch ($guide['post_type']) {
+			case 'announcement':
+				if (isset($guide['meta']['announcement-show-once'])) {
+					return current($guide['meta']['announcement-show-once']);
+				}
+				return false;
+				break;
+
+				case 'wizard':
+					if (isset($guide['meta']['wizard-show-once'])) {
+						return current($guide['meta']['wizard-show-once']);
+					}
+					return false;
+					break;
+
+			default:
+				return false;
+				break;
+		}
 	}
 
 	// private function getAnnouncements() {
@@ -119,6 +185,8 @@ class Yoda_WP_API_DB {
 		}
 
 	}
+
+
 
 	private function filterPosts($posts) {
 		// error_log(print_r($posts,true));

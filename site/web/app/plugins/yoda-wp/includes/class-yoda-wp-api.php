@@ -72,9 +72,14 @@ class Yoda_WP_API {
 	 */
 	public function get_guides ( WP_REST_Request $request ) {
 		$query_params = $request->get_query_params();
+		$post_data = $request->get_json_params();
+
+		$user_id = (isset($post_data['user_id']) && $post_data['user_id']) ? $post_data['user_id'] : false;
+
+		error_log("USER ID: {$post_data['user_id']}");
 
 		$use_dummy_data = isset($query_params['dummy']) ? (bool)$query_params['dummy'] : false;
-		return $this->db->get_guides('/', [], [], $use_dummy_data);
+		return $this->db->get_guides('/', [], $user_id, $use_dummy_data);
 	}
 
 	/**
