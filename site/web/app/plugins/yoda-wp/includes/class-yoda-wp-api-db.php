@@ -20,6 +20,10 @@
  */
 class Yoda_WP_API_DB {
 
+
+	/*
+		PUBLIC METHODS -----------------------------------------------
+	*/
 	public function __construct() {
 		$this->load_dependencies();
 	}
@@ -63,16 +67,53 @@ class Yoda_WP_API_DB {
 		return $this->mapPostsToOutputSchema($guides);
 	}
 
-	public static function getGuideAvailableTranslations($guide, $use_dummy_data = false) {
-		$translationsMeta = $use_dummy_data ?
-		self::getDummyTranslationsMeta() : (isset($guide->meta['translations']) ? $guide->meta['translations'] : false);
+	public function getGuide($guide_id) {
+		error_log('[finding guide ' . $guide_id.']');
+		$guide = get_post($guide_id);
+		error_log('-------------------------');
+		error_log(print_r($guide, true));
 
-		if (!$translationsMeta) {
+		if ($guide) {
+			return $guide;
+		} else {
 			return false;
 		}
-
-		return unserialize(current($translationsMeta));
 	}
+
+	public function markGuideComplete($guide_id, $user_id) {
+		error_log('user_id ' . $user_id);
+		global $wpdb;
+
+		$table_guides_completed = $wpdb->prefix . Yoda_WP_Admin::TABLE_GUIDES_COMPLETED;
+
+		$record = $wpdb->get_row( "SELECT * FROM $table_guides_completed WHERE guide_id = $guide_id and user_id = '$user_id'", ARRAY_A );
+
+		error_log(print_r($record, true));
+
+		if ($record) {
+			error_log('GUIDE ALREADY COMPLETE');
+			return $record;
+		} else {
+			error_log("INSERTING GUIDE with $user_id");
+			$wpdb->insert(
+				$table_guides_completed,
+				[
+					'guide_id' => $guide_id,
+					'user_id' => $user_id,
+					'completed_on' => current_time( 'mysql' )
+				],
+				[	'%d',	'%s', '%s' ]
+			);
+
+			return $wpdb->get_row( "SELECT * FROM $table_guides_completed WHERE id = {$wpdb->insert_id}", ARRAY_A );
+		}
+
+	}
+
+
+	/*
+		PRIVATE METHODS -----------------------------------------------
+	*/
 
 	private function translateGuides($guides, $locale, $use_dummy_data = false) {
 		error_log("[Translating Guides]: to '$locale'");
@@ -98,48 +139,17 @@ class Yoda_WP_API_DB {
 		return $translatedGuides;
 	}
 
-	private static function getDummyTranslationsMeta() {
-		$translations = [
-			"es" => [
-				"TITLE" => "My SWEET Title (spanish)",
-				"STEPS" => [
-					"1" => [
-						"TITLE" => "Step 1 title (spanish)",
-						"CONTENT" => "Step 1 content (spanish)"
-					],
-					"2" => [
-						"TITLE" => "Step 2 title (spanish)",
-						"CONTENT" => "Step 2 content (spanish)"
-					],
-					"3" => [
-						"TITLE" => "Step 3 title (spanish)",
-						"CONTENT" => "Step 3 content (spanish)"
-					]
-				]
-			]
-		];
-
-		return [maybe_serialize($translations)]; // make it look like wordpress serialized metadata
-	}
-
 	private function translateGuide($guide, $localeData) {
-		// error_log("translateGuide() --------------");
-		// error_log(print_r($guide, true));
-		// error_log(print_r($localeData, true));
-
 		switch ($guide->post_type) {
 			case 'announcement':
 				$guide->post_title = $localeData['TITLE']; // will be same as $localeData['STEPS']['1']['CONTENT'] for announcements
 				$guide->post_content = $localeData['STEPS']['1']['CONTENT'];
-				// error_log('TRANSLATED: ' . print_r($guide, true));
 				break;
 
 				case 'wizard':
 					$steps = unserialize(current($guide->meta['wizard-steps-repeater']));
-					// error_log('-------------------[steps]:' . print_r($steps, true));
 
 					$translatedSteps = array_map(function($step, $i) use ($localeData) {
-						// error_log('-----------current step:' . print_r($step, true));
 						$stepIdx = $i + 1;
 
 						return array_merge($step, [
@@ -152,7 +162,6 @@ class Yoda_WP_API_DB {
 
 					$guide->post_title = $localeData['TITLE'];
 					$guide->meta['wizard-steps-repeater'] = [maybe_serialize($translatedSteps)]; // wrap element in array for
-					// error_log('TRANSLATED: ' . print_r($guide, true));
 					break;
 		}
 
@@ -212,49 +221,6 @@ class Yoda_WP_API_DB {
 				return false;
 				break;
 		}
-	}
-
-	public function getGuide($guide_id) {
-		error_log('[finding guide ' . $guide_id.']');
-		$guide = get_post($guide_id);
-		error_log('-------------------------');
-		error_log(print_r($guide, true));
-
-		if ($guide) {
-			return $guide;
-		} else {
-			return false;
-		}
-	}
-
-	public function markGuideComplete($guide_id, $user_id) {
-		error_log('user_id ' . $user_id);
-		global $wpdb;
-
-		$table_guides_completed = $wpdb->prefix . Yoda_WP_Admin::TABLE_GUIDES_COMPLETED;
-
-		$record = $wpdb->get_row( "SELECT * FROM $table_guides_completed WHERE guide_id = $guide_id and user_id = '$user_id'", ARRAY_A );
-
-		error_log(print_r($record, true));
-
-		if ($record) {
-			error_log('GUIDE ALREADY COMPLETE');
-			return $record;
-		} else {
-			error_log("INSERTING GUIDE with $user_id");
-			$wpdb->insert(
-				$table_guides_completed,
-				[
-					'guide_id' => $guide_id,
-					'user_id' => $user_id,
-					'completed_on' => current_time( 'mysql' )
-				],
-				[	'%d',	'%s', '%s' ]
-			);
-
-			return $wpdb->get_row( "SELECT * FROM $table_guides_completed WHERE id = {$wpdb->insert_id}", ARRAY_A );
-		}
-
 	}
 
 	private function mapPostsToOutputSchema($posts) {
@@ -346,6 +312,50 @@ class Yoda_WP_API_DB {
 				]
 			]
 		];
+	}
+
+
+	/*
+		STATIC METHODS -----------------------------------------------
+	*/
+
+	public static function getGuideAvailableTranslations($guide, $use_dummy_data = false) {
+		if (!$guide->meta && !$use_dummy_data) {
+			$guide->meta = get_post_meta($guide->ID); // saturate with meta if it's not already there
+		}
+
+		$translationsMeta = $use_dummy_data ?
+		self::getDummyTranslationsMeta() : (isset($guide->meta['translations']) ? $guide->meta['translations'] : false);
+
+		if (!$translationsMeta) {
+			return false;
+		}
+
+		return unserialize(current($translationsMeta));
+	}
+
+	private static function getDummyTranslationsMeta() {
+		$translations = [
+			"es" => [
+				"TITLE" => "My SWEET Title (spanish)",
+				"STEPS" => [
+					"1" => [
+						"TITLE" => "Step 1 title (spanish)",
+						"CONTENT" => "Step 1 content (spanish)"
+					],
+					"2" => [
+						"TITLE" => "Step 2 title (spanish)",
+						"CONTENT" => "Step 2 content (spanish)"
+					],
+					"3" => [
+						"TITLE" => "Step 3 title (spanish)",
+						"CONTENT" => "Step 3 content (spanish)"
+					]
+				]
+			]
+		];
+
+		return [maybe_serialize($translations)]; // make it look like wordpress serialized metadata
 	}
 
 }
