@@ -41,12 +41,34 @@ class Yoda_WP_API_DB {
 			return $this->getDummyGuideData();
 		}
 
-		$guides = $this->queryPosts([
+		$query = [
 			'post_type' => ['announcement', 'wizard'],
 			'post_status' => 'publish',
 			'orderby' => 'ID',
 			'order' => 'ASC',
-		], true);
+		];
+
+		if ($route) {
+			error_log('[Filtering Guides by Route]: ' . $route);
+			$query = array_merge($query, [
+				'meta_query' => [
+					'relation' => 'OR',
+					[
+						'key'     => 'announcement-url',
+						'value'   => $route,
+						'compare' => 'LIKE'
+					],
+					[
+						'key'     => 'wizard-url',
+						'value'   => $route,
+						'compare' => 'LIKE'
+					]
+				]
+			]);
+		}
+
+		// Get the guides!
+		$guides = $this->queryPosts($query, true);
 
 		if ($user_id) {
 			error_log('[Filtering Completed Guides]: for user_id: ' . $user_id);
@@ -234,6 +256,7 @@ class Yoda_WP_API_DB {
 					return [
 						'id' => $x['ID'],
 						'title' => $x['post_title'],
+						'url' => isset($x['meta']['announcement-url']) ? current($x['meta']['announcement-url']) : '',
 						'steps' => [[
 							'title' => $x['post_title'],
 							'selector' => isset($x['meta']['announcement-selector']) ? current($x['meta']['announcement-selector']) : '',
@@ -251,6 +274,7 @@ class Yoda_WP_API_DB {
 						return [
 							'id' => $x['ID'],
 							'title' => $x['post_title'],
+							'url' => isset($x['meta']['wizard-url']) ? current($x['meta']['wizard-url']) : '',
 							'steps' => array_map(function($s) {
 								return [
 									'title' => isset($s['step-title']) ? $s['step-title'] : '',

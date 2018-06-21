@@ -75,13 +75,14 @@ class Yoda_WP_API {
 		$post_data = $request->get_json_params();
 		$DEFAULT_LOCALE = 'en';
 
+		$route = (isset($post_data['route']) && $post_data['route']) ? $post_data['route'] : false;
 		$user_id = (isset($post_data['user_id']) && $post_data['user_id']) ? $post_data['user_id'] : false;
 		$locale = (isset($post_data['locale']) && $post_data['locale']) ? $post_data['locale'] : $DEFAULT_LOCALE;
 
 		// error_log("USER ID: {$post_data['user_id']}");
 
 		$use_dummy_data = isset($query_params['dummy']) ? $query_params['dummy'] : false;
-		return $this->db->get_guides('/', [], $user_id, $locale, $use_dummy_data);
+		return $this->db->get_guides($route, [], $user_id, $locale, $use_dummy_data);
 	}
 
 	/**
