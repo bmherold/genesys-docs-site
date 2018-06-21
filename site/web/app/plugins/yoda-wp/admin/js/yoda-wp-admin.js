@@ -134,6 +134,10 @@
       // get URL for iFrame and set it
       $('#iframe-for-element-selection').attr('src', $('#url-for-iframe').val());
 
+      // tell Yoda to LIVE
+      var message = { 'yodaMessage': 'init' };
+      $('#iframe-for-element-selection')[0].contentWindow.postMessage(message, '*');
+
       // wait for PostMessage from iFrame - yodaMessage: 'iframe-ready'
       let handle = function(event) {
         console.log(' ********* POST MESSAGE EVENT', event);
