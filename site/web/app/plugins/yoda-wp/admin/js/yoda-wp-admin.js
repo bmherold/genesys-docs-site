@@ -92,7 +92,7 @@
    */
   var selectorInput = null;
   $('#dialog-for-iframe').dialog({
-    title: 'My Dialog',
+    title: 'Select Page Element',
     dialogClass: 'wp-dialog',
     autoOpen: false,
     draggable: false,

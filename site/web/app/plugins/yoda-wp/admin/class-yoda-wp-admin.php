@@ -292,6 +292,7 @@ class Yoda_WP_Admin {
 	public function cpt_announcement_save( $post_id, $object ) {
 		if ( 'announcement' !== $object->post_type ) { return $post_id; }
         if ( 'auto-draft' === get_post_status( $post_id ) ) { return $post_id; }
+        if ( 'trash' === get_post_status( $post_id ) ) { return $post_id; }
 
 		$nonces = array('announcement-settings');
 
@@ -484,7 +485,9 @@ class Yoda_WP_Admin {
 
     public function cpt_wizard_save( $post_id, $object ) {
         if ( 'wizard' !== $object->post_type ) { return $post_id; }
-        if ( 'auto-draft' === get_post_status( $post_id ) ) { return $post_id; }
+		if ( 'auto-draft' === get_post_status( $post_id ) ) { return $post_id; }
+		if ( 'trash' === get_post_status( $post_id ) ) { return $post_id; }
+
 
         $nonces = array('wizard-settings', 'wizard-steps-repeater');
 
