@@ -14,7 +14,7 @@ $this->meta = get_post_meta( $post->ID, 'translations' );
 
 $langs = array( 'es', 'jp', 'no', 'ru', 'de' );
 
-$availableLangs = array_keys($this->db::getGuideAvailableTranslations($post));
+$availableLangs = is_array($this->db::getGuideAvailableTranslations($post)) ? array_keys($this->db::getGuideAvailableTranslations($post)) : [];
 
 foreach ($langs as $lang) {
     if ( in_array($lang, $availableLangs) ) { ?>
