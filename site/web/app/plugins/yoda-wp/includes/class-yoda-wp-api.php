@@ -73,7 +73,7 @@ class Yoda_WP_API {
 	public function get_guides ( WP_REST_Request $request ) {
 		$query_params = $request->get_query_params();
 		$post_data = $request->get_json_params();
-		$DEFAULT_LOCALE = 'en';
+		$DEFAULT_LOCALE = 'en-us';
 
 		$route = (isset($post_data['route']) && $post_data['route']) ? $post_data['route'] : false;
 		$user_id = (isset($post_data['user_id']) && $post_data['user_id']) ? $post_data['user_id'] : false;

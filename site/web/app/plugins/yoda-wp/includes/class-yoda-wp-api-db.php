@@ -81,7 +81,7 @@ class Yoda_WP_API_DB {
 			error_log('Guide "'.$guide->post_title.'" has these available translations: ' . print_r($availableTranslations, true));
 		}
 
-		$DEFAULT_LOCALE = 'en';
+		$DEFAULT_LOCALE = 'en-us';
 		if ($locale != $DEFAULT_LOCALE) {
 			$guides = $this->translateGuides($guides, $locale, (bool)$use_dummy_data);
 		}
@@ -147,7 +147,7 @@ class Yoda_WP_API_DB {
 			error_log("[Translating Guide]: " . $guide->post_title);
 
 			$translations = self::getGuideAvailableTranslations($guide, $use_dummy_data);
-			$localeData = ($translations && $translations[$locale]) ? $translations[$locale] : false;
+			$localeData = ($translations && isset($translations[$locale])) ? $translations[$locale] : false;
 			if (!$localeData) {
 				error_log("- skipping translation, missing desired locale");
 				$translatedGuides[] = $guide;
@@ -162,17 +162,19 @@ class Yoda_WP_API_DB {
 	}
 
 	private function translateGuide($guide, $localeData) {
+		error_log(print_r($localeData, true));
+
 		switch ($guide->post_type) {
 			case 'announcement':
 				$guide->post_title = $localeData['TITLE']; // will be same as $localeData['STEPS']['1']['CONTENT'] for announcements
-				$guide->post_content = $localeData['STEPS']['1']['CONTENT'];
+				$guide->post_content = $localeData['CONTENT'];
 				break;
 
 				case 'wizard':
 					$steps = unserialize(current($guide->meta['wizard-steps-repeater']));
 
 					$translatedSteps = array_map(function($step, $i) use ($localeData) {
-						$stepIdx = $i + 1;
+						$stepIdx = $i;
 
 						return array_merge($step, [
 							'step-title' => isset($localeData['STEPS']["$stepIdx"]["TITLE"]) ?

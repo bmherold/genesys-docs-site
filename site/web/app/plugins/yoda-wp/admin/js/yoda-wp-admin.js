@@ -141,6 +141,11 @@
         if ( data.yodaMessage ) {
           if ( data.yodaMessage === 'iframe-ready' ) {
             console.log(' ********* POST MESSAGE!!!!!', data);
+
+            // clear any pops
+            var message = { 'yodaMessage': 'clear-pops' };
+            $('#iframe-for-element-selection')[0].contentWindow.postMessage(message, '*');
+
             $('#selection-mode').prop("disabled", false).removeClass("ui-state-disabled");
             $('#save-selection').prop("disabled", true).addClass("ui-state-disabled");
           } else if ( data.yodaMessage === 'return-selector' ) {
