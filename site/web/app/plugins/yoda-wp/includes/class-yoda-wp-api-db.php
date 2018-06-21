@@ -77,7 +77,7 @@ class Yoda_WP_API_DB {
 
 		foreach($guides as $guide) {
 			$translations = self::getGuideAvailableTranslations($guide, (bool)$use_dummy_data);
-			$availableTranslations = $translations ? array_keys($translations) : 'none';
+			$availableTranslations = $translations ? array_keys($translations) : false;
 			error_log('Guide "'.$guide->post_title.'" has these available translations: ' . print_r($availableTranslations, true));
 		}
 
