@@ -90,6 +90,7 @@
   /**
    * Dialogue for Iframe!
    */
+  var selectorInput = null;
   $('#dialog-for-iframe').dialog({
     title: 'My Dialog',
     dialogClass: 'wp-dialog',
@@ -145,7 +146,9 @@
           } else if ( data.yodaMessage === 'return-selector' ) {
             console.log(' ********* POST MESSAGE!!!!!', data);
             $('#save-selection').prop("disabled", false).removeClass("ui-state-disabled");
-            $('.element-selection-mode').val( data.yodaMessageSelector );
+
+            // get correct element for repeater
+            $(selectorInput).val( data.yodaMessageSelector );
           }
         }
       }
@@ -163,6 +166,8 @@
   // bind a button or a link to open the dialog
   $('.element-selection-mode').click(function(e) {
     e.preventDefault();
+    selectorInput = $(e.target).siblings('input')[0];
+    console.log(' ********* TARGET >>>>>>>>>> ', selectorInput);
     $('#dialog-for-iframe').dialog('open');
   });
 

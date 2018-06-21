@@ -49,7 +49,7 @@ include( plugin_dir_path( __FILE__ ) . $this->plugin_name . '-admin-field-text.p
 ?></p><?php
 
 $atts                   = array();
-$atts['class']          = 'widefat';
+$atts['class']          = 'widefat  element-selector';
 $atts['description']    = '';
 $atts['id']             = 'announcement-selector';
 $atts['label']          = 'Select Element on Page';

@@ -32,7 +32,7 @@ $setatts['fields'][$i]['text']['placeholder']           = 'Step ' . $count;
 $setatts['fields'][$i]['text']['type']                  = 'text';
 $setatts['fields'][$i]['text']['value']                 = '';
 $i++;
-$setatts['fields'][$i]['text']['class']                 = 'widefat';
+$setatts['fields'][$i]['text']['class']                 = 'widefat element-selector';
 $setatts['fields'][$i]['text']['description']           = '';
 $setatts['fields'][$i]['text']['id']                    = 'step-selector';
 $setatts['fields'][$i]['text']['label']                 = 'Select Element on Page';

@@ -51,6 +51,7 @@ class Yoda_WP_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+        //$this->db = new Yoda_WP_API_DB();
 
 	}
 
@@ -447,6 +448,12 @@ class Yoda_WP_Admin {
         ) );
 
         $this->validate_meta( $_POST, $post_id, $object, $nonces, $fields);
+
+        //$translations = get_post_meta( $post_id, 'translations' );
+
+        // translate TITLE
+
+        // translate each : step-title / stepContent
     }
 
 
@@ -510,7 +517,6 @@ class Yoda_WP_Admin {
 				$new_value 	= array();
 				for ( $i = 0; $i < $count; $i++ ) {
 					foreach ( $clean as $field_name => $field ) {
-                        error_log("***********  REPEATER FIELD >>>>>>>>> ".$field_name." >>>>> NEW VALUE >>>>>>>" . $field[$i]);
 						$new_value[$i][$field_name] = $field[$i];
 					} // foreach $clean
 				} // for
@@ -518,6 +524,10 @@ class Yoda_WP_Admin {
 				$new_value = $this->sanitizer( $type, $posted[$name] ?? null );
 			}
 			update_post_meta( $post_id, $name, $new_value );
+
+            // dummy translations
+
+            //$translations = $this->$db::getGuideAvailableTranslations($object);
 		} // foreach
 	}
 
