@@ -412,8 +412,8 @@ class Yoda_WP_Admin {
             apply_filters( $this->plugin_name . '-metabox-wizard-settings', esc_html__( 'Settings', 'yoda-wp' ) ),
             array( $this, 'metabox' ),
             'wizard',
-            'side',
-            'default',
+            'advanced',
+            'high',
             array(
                 'file' => 'wizard-settings'
             )
@@ -424,7 +424,7 @@ class Yoda_WP_Admin {
             array( $this, 'metabox' ),
             'wizard',
             'advanced',
-            'high',
+            'default',
             array(
                 'file' => 'wizard-steps'
             )
@@ -510,6 +510,7 @@ class Yoda_WP_Admin {
 				$new_value 	= array();
 				for ( $i = 0; $i < $count; $i++ ) {
 					foreach ( $clean as $field_name => $field ) {
+                        error_log("***********  REPEATER FIELD >>>>>>>>> ".$field_name." >>>>> NEW VALUE >>>>>>>" . $field[$i]);
 						$new_value[$i][$field_name] = $field[$i];
 					} // foreach $clean
 				} // for

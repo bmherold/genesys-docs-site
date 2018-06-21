@@ -49,13 +49,14 @@ include( plugin_dir_path( __FILE__ ) . $this->plugin_name . '-admin-field-text.p
 ?></p><?php
 
 $atts                   = array();
-$atts['class']          = 'widefat element-selection-mode';
+$atts['class']          = 'widefat';
 $atts['description']    = '';
 $atts['id']             = 'announcement-selector';
 $atts['label']          = 'Select Element on Page';
 $atts['name']           = 'announcement-selector';
 $atts['placeholder']    = '';
 $atts['type']           = 'text';
+$atts['icon']           = 'element-selection-mode dashicons dashicons-external';
 $atts['value']          = '';
 if ( ! empty( $this->meta[$atts['id']][0] ) ) {
     $atts['value'] = $this->meta[$atts['id']][0];

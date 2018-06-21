@@ -75,11 +75,17 @@
 
 
 .repeater .link-remove {
-  color     : #a00;
-  text-decoration : none;
+    color     : #a00;
+    text-decoration : none;
 }
 
 .repeater .link-remove:hover {
     color       : red;
     text-decoration : underline;
+}
+
+.element-selection-mode {
+    position: absolute;
+    right: 25px;
+    padding-top: 2px;
 }

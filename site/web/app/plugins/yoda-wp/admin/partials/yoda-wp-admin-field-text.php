@@ -17,6 +17,9 @@ if ( ! empty( $atts['label'] ) ) {
     placeholder="<?php echo esc_attr( $atts['placeholder'] ); ?>"
     type="<?php echo esc_attr( $atts['type'] ); ?>"
     value="<?php echo esc_attr( $atts['value'] ); ?>" /><?php
+if ( ! empty( $atts['icon'] ) ) {
+    ?><span class="<?php echo esc_attr( $atts['icon'] ); ?>"></span><?php
+}
 if ( ! empty( $atts['description'] ) ) {
     ?><span class="description"><?php esc_html_e( $atts['description'], 'yoda-wp' ); ?></span><?php
 }
