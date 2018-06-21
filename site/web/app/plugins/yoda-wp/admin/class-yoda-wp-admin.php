@@ -51,7 +51,9 @@ class Yoda_WP_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-        //$this->db = new Yoda_WP_API_DB();
+
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-yoda-wp-api-db.php';
+        $this->db = new Yoda_WP_API_DB();
 
 	}
 
@@ -273,6 +275,17 @@ class Yoda_WP_Admin {
 				'file' => 'announcement-settings'
 			)
 		);
+        add_meta_box(
+            'translations',
+            apply_filters( $this->plugin_name . '-metabox-translations', esc_html__( 'Translations', 'yoda-wp' ) ),
+            array( $this, 'metabox' ),
+            'announcement',
+            'side',
+            'default',
+            array(
+                'file' => 'translations'
+            )
+        );
 
 	}
 
@@ -288,6 +301,31 @@ class Yoda_WP_Admin {
 		$fields[] = array('announcement-show-once', 'checkbox');
 
 		$this->validate_meta( $_POST, $post_id, $object, $nonces, $fields);
+
+        // translate title and content!
+        // fake translations
+
+        $metas = get_post_meta( $post_id );
+        //$metas = unserialize($metas);
+        // error_log("************ POSTED!!!!!! >>>>>>> ". print_r($_POST, true));
+        // error_log("************ METAS!!!!!!! >>>>>>> ". print_r($metas, true));
+        $translations = $metas['translations'] ?? [];
+        $newTranslations = [];
+
+        $langs = array( 'es', 'jp', 'de' );
+
+        foreach ($langs as $lang) {
+            $languageStr = "( !!!!! in " . $lang . " !!!!! )";
+            // see if lang key exists
+            $trans = ( isset( $translations[$lang] ) ) ?? [ ];
+            // translate post_title
+            $trans['TITLE'] = $_POST['post_title'] . $languageStr;
+            // translate each : post_content
+            $trans['CONTENT'] = $_POST['post_content'] . $languageStr;
+            $newTranslations[$lang] = $trans;
+        }
+        update_post_meta( $post_id, 'translations', $newTranslations );
+
 	}
 
     // --------------------------- WIZARDS -------------------------------------
@@ -430,6 +468,17 @@ class Yoda_WP_Admin {
                 'file' => 'wizard-steps'
             )
         );
+        add_meta_box(
+            'translations',
+            apply_filters( $this->plugin_name . '-metabox-translations', esc_html__( 'Translations', 'yoda-wp' ) ),
+            array( $this, 'metabox' ),
+            'wizard',
+            'side',
+            'default',
+            array(
+                'file' => 'translations'
+            )
+        );
     }
 
     public function cpt_wizard_save( $post_id, $object ) {
@@ -449,11 +498,37 @@ class Yoda_WP_Admin {
 
         $this->validate_meta( $_POST, $post_id, $object, $nonces, $fields);
 
-        //$translations = get_post_meta( $post_id, 'translations' );
+        // fake translations
 
-        // translate TITLE
+        $metas = get_post_meta( $post_id );
+        //$metas = unserialize($metas);
+        $translations = $metas['translations'] ?? [];
+        $newTranslations = [];
 
-        // translate each : step-title / stepContent
+        $langs = array( 'es', 'jp', 'de' );
+
+        foreach ($langs as $lang) {
+            $languageStr = "( !!!!! in " . $lang . " !!!!! )";
+            // see if lang key exists
+            $trans = ( isset( $translations[$lang] ) ) ?? [];
+            // translate title
+            $trans['TITLE'] = $_POST['post_title'] . $languageStr;
+            // translate each : step-title / stepContent
+            $trans['STEPS'] = [];
+
+            foreach ($_POST['step-title'] as $i => $value) {
+                if ( ! empty( $value ) ) {
+                    $trans['STEPS'][$i]['TITLE'] = $value . $languageStr;
+                }
+            }
+            foreach ($_POST['stepContent'] as $i => $value) {
+                if ( ! empty( $value ) ) {
+                    $trans['STEPS'][$i]['CONTENT'] = $value . $languageStr;
+                }
+            }
+            $newTranslations[$lang] = $trans;
+        }
+        update_post_meta( $post_id, 'translations', $newTranslations );
     }
 
 
@@ -520,6 +595,7 @@ class Yoda_WP_Admin {
 						$new_value[$i][$field_name] = $field[$i];
 					} // foreach $clean
 				} // for
+                error_log("******** REPEATER VALUES FOR ".$name." >>>>>> " . print_r($new_value, true));
 			} else {
 				$new_value = $this->sanitizer( $type, $posted[$name] ?? null );
 			}

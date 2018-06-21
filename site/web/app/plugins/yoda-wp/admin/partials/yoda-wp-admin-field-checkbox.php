@@ -14,6 +14,7 @@
         id="<?php echo esc_attr( $atts['id'] ); ?>"
         name="<?php echo esc_attr( $atts['name'] ); ?>"
         type="checkbox"
-        value="1" />
+        value="1"
+        <?php if ( isset( $atts['disabled'] ) && $atts['disabled'] ) echo 'disabled'; ?>/>
     <span class="description"><?php esc_html_e( $atts['label'], 'yoda-wp' ); ?></span>
 </label>
