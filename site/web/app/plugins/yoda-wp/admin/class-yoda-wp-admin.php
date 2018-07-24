@@ -53,8 +53,10 @@ class Yoda_WP_Admin {
 		$this->version = $version;
 
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-yoda-wp-api-db.php';
-        $this->db = new Yoda_WP_API_DB();
+		$this->db = new Yoda_WP_API_DB();
 
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-yoda-wp-translations.php';
+		$this->yoda_translations = new Yoda_WP_Translations();
 	}
 
 	/**
@@ -308,24 +310,27 @@ class Yoda_WP_Admin {
         // fake translations
 
         $metas = get_post_meta( $post_id );
-        //$metas = unserialize($metas);
-        // error_log("************ POSTED!!!!!! >>>>>>> ". print_r($_POST, true));
-        // error_log("************ METAS!!!!!!! >>>>>>> ". print_r($metas, true));
-        $translations = $metas['translations'] ?? [];
-        $newTranslations = [];
+        // //$metas = unserialize($metas);
+        // // error_log("************ POSTED!!!!!! >>>>>>> ". print_r($_POST, true));
+        // // error_log("************ METAS!!!!!!! >>>>>>> ". print_r($metas, true));
+        // $translations = $metas['translations'] ?? [];
+        // $newTranslations = [];
 
-        $langs = array( 'es', 'jp', 'de' );
+        // $langs = array( 'es', 'jp', 'de' );
 
-        foreach ($langs as $lang) {
-            $languageStr = "( !!!!! in " . $lang . " !!!!! )";
-            // see if lang key exists
-            $trans = ( isset( $translations[$lang] ) ) ?? [ ];
-            // translate post_title
-            $trans['TITLE'] = $_POST['post_title'] . $languageStr;
-            // translate each : post_content
-            $trans['CONTENT'] = $_POST['post_content'] . $languageStr;
-            $newTranslations[$lang] = $trans;
-        }
+        // foreach ($langs as $lang) {
+        //     $languageStr = "( !!!!! in " . $lang . " !!!!! )";
+        //     // see if lang key exists
+        //     $trans = ( isset( $translations[$lang] ) ) ?? [ ];
+        //     // translate post_title
+        //     $trans['TITLE'] = $_POST['post_title'] . $languageStr;
+        //     // translate each : post_content
+        //     $trans['CONTENT'] = $_POST['post_content'] . $languageStr;
+        //     $newTranslations[$lang] = $trans;
+		// }
+
+
+
         update_post_meta( $post_id, 'translations', $newTranslations );
 
 	}

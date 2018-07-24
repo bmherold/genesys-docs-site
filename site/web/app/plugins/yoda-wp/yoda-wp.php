@@ -13,9 +13,9 @@
  * @package           Yoda_WP
  *
  * @wordpress-plugin
- * Plugin Name:       Yoda WP
+ * Plugin Name:       YODA WP
  * Plugin URI:        http://example.com/yoda-wp-uri/
- * Description:       Create and manage UI guides and announcements for your web application... like a space wizard
+ * Description:       Your Online Directory Assistant - Create and manage UI guides and announcements for your web application... like a space wizard.
  * Version:           1.0.0
  * Author:            Madison, WI UI Team
  * Author URI:        http://example.com/

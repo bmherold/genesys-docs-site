@@ -28,11 +28,13 @@ class Yoda_WP_API {
 	 * @var      Yoda_WP_API_DB    $db    The DB object.
 	 */
 	private $db;
+	private $yoda_translations;
 
 	public function __construct() {
 
 		$this->load_dependencies();
 		$this->db = new Yoda_WP_API_DB();
+		$this->yoda_translations = new Yoda_WP_Translations();
 
 	}
 
@@ -42,6 +44,7 @@ class Yoda_WP_API {
 		 * The class that defines all the route callbacks
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-yoda-wp-api-db.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-yoda-wp-translations.php';
 	}
 
 	/**
@@ -106,6 +109,48 @@ class Yoda_WP_API {
 		} else {
 			return new WP_Error('yoda_wp__error_guide_not_found',__('A guide with this id does not exist'), ['status' => 400]);
 		}
+
+	}
+
+
+	/**
+	 * Bitbucket webhook fired - Pickup any new translations
+	 *
+   * 1. fetch newest version of master branch of yoda-translations
+   * 2. combine all translations languages into one master file keyed off post-slug
+   * 2.1.
+	 * {
+	 *   "post-slug-1": {
+	 *     "en": {
+	 *       "title": "...",
+	 *       "body": "..."
+	 *     },
+	 *     "de": {
+	 *       "title": "...",
+	 *       "body": "..."
+	 *     }
+	 *   },
+	 *   "post-slug-2": {
+	 *     "en": {
+	 *       "title": "...",
+	 *       "body": "..."
+	 *     },
+	 *     "de": {
+	 *       "title": "...",
+	 *       "body": "..."
+	 *     }
+	 *   }
+	 * }
+   * 3. Update all wordpress posts found in combined translations by setting their wp-meta[translations] data to the updated “all languages” object for each slug-id.
+	 *
+	 * @since    1.0.0
+	 */
+	public function webhooks_bitbucket ( WP_REST_Request $request ) {
+
+		// TODO - implement fetching new translations data for all posts
+		return $this->yoda_translations::init_repository();
+
+		// return "hello world!";
 
 	}
 
