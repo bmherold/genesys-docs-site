@@ -315,7 +315,7 @@ class Yoda_WP_Admin {
 
 		try {
 			$this->yoda_translations = new Yoda_WP_Translations($gitRepo);
-			$didUpdate = $this->yoda_translations->update($post_id, $_POST['post_title'], $_POST['post_content']);
+			$didUpdate = $this->yoda_translations->update_repository($post_id, $_POST['post_title'], $_POST['post_content']);
 
 			if ($didUpdate) {
 				$this->display_message('Yoda translations published to repository.', 'success');

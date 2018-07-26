@@ -91,7 +91,7 @@ class Yoda_WP_API_Routes {
 		));
 
 		register_rest_route('api/v1', '/webhooks/bitbucket', array(
-			'methods' => 'GET',
+			'methods' => 'GET,POST',
 			'callback' => [$this->api, 'webhooks_bitbucket']
 		));
 

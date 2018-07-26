@@ -144,6 +144,7 @@ class Yoda_WP_API {
 	 * @since    1.0.0
 	 */
 	public function webhooks_bitbucket ( WP_REST_Request $request ) {
+		error_log('BITBUCKET WEBHOOK HAPPENED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
 
 		// TODO - implement fetching new translations data for all posts
 		$gitUsername = urlencode(getenv('GIT_USERNAME'));
@@ -153,8 +154,20 @@ class Yoda_WP_API {
 		try {
 			$this->yoda_translations = new Yoda_WP_Translations($gitRepo);
 		} catch (Exception $e) {
-			return "Couldn't clone the repo at: {$gitRepo}, {$message}";
+			return "Couldn't clone the repo at: {$gitRepo}, {$e->getMessage()}";
 		}
+
+		try {
+			$sync_success = $this->yoda_translations->sync_post_translations();
+			if (!$sync_success) {
+				return "There was a problem syncing post translations: [Unknown error]";
+			}
+		} catch (Exception $e) {
+			return "There was a problem syncing post translations: {$e->getMessage()}";
+		}
+
+		return "Successfully updated Yoda translations.";
+
 	}
 
 }

@@ -12,10 +12,10 @@ if ( empty( $post ) ) { return; }
 if ( 'wizard' != $post->post_type && 'announcement' != $post->post_type ) { return; }
 $this->meta = get_post_meta( $post->ID, 'translations' );
 
-$langs = array( 'es', 'jp', 'no', 'ru', 'de' );
+$langs = array( 'es', 'jp', 'no', 'ru', 'de', 'fr' );
 
 $availableLangs = is_array($this->db::getGuideAvailableTranslations($post)) ? array_keys($this->db::getGuideAvailableTranslations($post)) : [];
-settings_errors();
+
 foreach ($langs as $lang) {
     if ( in_array($lang, $availableLangs) ) { ?>
         <p>

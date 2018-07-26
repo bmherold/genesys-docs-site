@@ -75,19 +75,17 @@ class Yoda_WP_Translations {
     } catch (Exception $e) {
       throw new Exception("There were issues decoding the en.json locale. Fix the Yoda git translations repository.");
       // TODO - email/notify someone who cares to fix the en.json formatting
-      return false;
     }
 
     $englishJson[$post_id] = [
-      'title' => $post_title,
-      'body' => $post_content
+      'TITLE' => $post_title,
+      'CONTENT' => $post_content
     ];
 
     try {
       $englishJsonString = json_encode($englishJson);
     } catch (Exception $e) {
       throw new Exception("There were issues encoding the en.json locale. There may be a problem with your title or content.");
-      return false;
     }
 
     file_put_contents($englishJsonFilePath, $englishJsonString);
@@ -116,4 +114,41 @@ class Yoda_WP_Translations {
     return $this->repository->getStatus();
   }
 
+  public function sync_post_translations() {
+    $localesFolder = plugin_dir_path( dirname( __FILE__ ) ) . self::TEMP_FOLDER . '/' . $this->localesDir;
+
+    $combinedJson = [];
+
+		foreach (glob("{$localesFolder}/*.json") as $file) {
+      $file_parts = pathinfo($file);
+      $lang = $file_parts['filename'];
+      $jsonString = file_get_contents($file);
+
+      if ($lang == 'en') {
+        continue; // skip sync english translations - they will be natively in the wordpress
+      }
+
+      try {
+        $langJson = json_decode($jsonString, true);
+      } catch (Exception $e) {
+        throw new Exception("There were issues decoding the {$lang} locale. Fix the Yoda git translations repository.");
+        // TODO - email/notify someone who cares to fix the en.json formatting
+      }
+
+      foreach($langJson as $post_id => $post){
+        if (!isset($combinedJson[$post_id])) {
+          $combinedJson[$post_id] = [];
+        }
+
+        $combinedJson[$post_id][$lang] = $post;
+      }
+
+    }
+
+    foreach ($combinedJson as $post_id => $translations) {
+      update_post_meta( $post_id, 'translations', $translations );
+    }
+
+    return true;
+  }
 }
