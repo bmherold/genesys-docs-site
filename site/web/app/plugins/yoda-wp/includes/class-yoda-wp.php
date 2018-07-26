@@ -79,6 +79,7 @@ class Yoda_WP {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 		$this->init_api();
+		$this->start_session();
 
 	}
 
@@ -171,6 +172,9 @@ class Yoda_WP {
 		$this->loader->add_action( 'init', $plugin_admin, 'new_cpt_announcement' );
 		$this->loader->add_action( 'add_meta_boxes_announcement', $plugin_admin, 'cpt_announcement_add_metaboxes' );
 		$this->loader->add_action( 'save_post_announcement', $plugin_admin, 'cpt_announcement_save', 10, 2 );
+		$this->loader->add_action( 'publish_announcement', $plugin_admin, 'cpt_announcement_publish', 10, 2 );
+		$this->loader->add_action( 'admin_notices', $plugin_admin, 'admin_notices', 10, 2 );
+
 		$this->loader->add_filter( 'post_updated_messages', $plugin_admin, 'cpt_announcement_updated_messages' );
 
 		$this->loader->add_action( 'init', $plugin_admin, 'new_cpt_wizard' );
@@ -207,6 +211,13 @@ class Yoda_WP {
 
 		$this->loader->add_action( 'init', $plugin_api_routes, 'cors_init' );
 		$this->loader->add_action( 'rest_api_init', $plugin_api_routes, 'rest_api_init' );
+	}
+
+	private function start_session() {
+		// Use this to pass around errors on post save/publish.
+    if(!session_id()) {
+        session_start();
+    }
 	}
 
 	/**

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "522af27f95e241243544bb975174be98",
+    "content-hash": "6808cd0c2db37d239276e42f11d46431",
     "packages": [
         {
             "name": "cypresslab/gitelephant",
@@ -355,6 +355,42 @@
             "description": "Symfony Process Component",
             "homepage": "https://symfony.com",
             "time": "2018-05-31T10:17:53+00:00"
+        },
+        {
+            "name": "yahnis-elsts/admin-notices",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/YahnisElsts/admin-notices.git",
+                "reference": "04f54614e27b400f231fa63ea7dd3461440eea8d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/YahnisElsts/admin-notices/zipball/04f54614e27b400f231fa63ea7dd3461440eea8d",
+                "reference": "04f54614e27b400f231fa63ea7dd3461440eea8d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "AdminNotice.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Yahnis Elsts",
+                    "email": "whiteshadow@w-shadow.com"
+                }
+            ],
+            "description": "A utility library for WordPress plugins that makes it easier to create admin notices. Supports persistently dismissible notices.",
+            "time": "2017-03-20T15:26:49+00:00"
         }
     ],
     "packages-dev": [],

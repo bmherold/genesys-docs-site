@@ -34,8 +34,6 @@ class Yoda_WP_API {
 
 		$this->load_dependencies();
 		$this->db = new Yoda_WP_API_DB();
-		$this->yoda_translations = new Yoda_WP_Translations();
-
 	}
 
 	private function load_dependencies() {
@@ -148,10 +146,15 @@ class Yoda_WP_API {
 	public function webhooks_bitbucket ( WP_REST_Request $request ) {
 
 		// TODO - implement fetching new translations data for all posts
-		return $this->yoda_translations::init_repository();
+		$gitUsername = urlencode(getenv('GIT_USERNAME'));
+		$gitPassword = urlencode(getenv('GIT_PASSWORD'));
+		$gitRepo = "https://{$gitUsername}:{$gitPassword}@bitbucket.org/inindca/yoda-translations";
 
-		// return "hello world!";
-
+		try {
+			$this->yoda_translations = new Yoda_WP_Translations($gitRepo);
+		} catch (Exception $e) {
+			return "Couldn't clone the repo at: {$gitRepo}, {$message}";
+		}
 	}
 
 }

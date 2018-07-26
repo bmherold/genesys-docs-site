@@ -1,5 +1,5 @@
 <?php
-
+use \YeEasyAdminNotices\V1\AdminNotice;
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -40,6 +40,8 @@ class Yoda_WP_Admin {
 	 */
 	private $version;
 
+	private $error_message;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -56,7 +58,6 @@ class Yoda_WP_Admin {
 		$this->db = new Yoda_WP_API_DB();
 
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-yoda-wp-translations.php';
-		$this->yoda_translations = new Yoda_WP_Translations();
 	}
 
 	/**
@@ -305,34 +306,45 @@ class Yoda_WP_Admin {
 		$fields[] = array('announcement-show-once', 'checkbox');
 
 		$this->validate_meta( $_POST, $post_id, $object, $nonces, $fields);
+	}
 
-        // translate title and content!
-        // fake translations
+	function cpt_announcement_publish( $post_id, $object ) {
+		$gitUsername = urlencode(getenv('GIT_USERNAME'));
+		$gitPassword = urlencode(getenv('GIT_PASSWORD'));
+		$gitRepo = "https://{$gitUsername}:{$gitPassword}@bitbucket.org/inindca/yoda-translations";
 
-        $metas = get_post_meta( $post_id );
-        // //$metas = unserialize($metas);
-        // // error_log("************ POSTED!!!!!! >>>>>>> ". print_r($_POST, true));
-        // // error_log("************ METAS!!!!!!! >>>>>>> ". print_r($metas, true));
-        // $translations = $metas['translations'] ?? [];
-        // $newTranslations = [];
+		try {
+			$this->yoda_translations = new Yoda_WP_Translations($gitRepo);
+			$didUpdate = $this->yoda_translations->update($post_id, $_POST['post_title'], $_POST['post_content']);
 
-        // $langs = array( 'es', 'jp', 'de' );
+			if ($didUpdate) {
+				$this->display_message('Yoda translations published to repository.', 'success');
+			} else {
+				$this->display_message('Yoda translations updated, but there were no changes to publish.', 'success');
+			}
+		} catch (Exception $e) {
+			$this->display_message($e->getMessage(), 'error');
+		}
+	}
 
-        // foreach ($langs as $lang) {
-        //     $languageStr = "( !!!!! in " . $lang . " !!!!! )";
-        //     // see if lang key exists
-        //     $trans = ( isset( $translations[$lang] ) ) ?? [ ];
-        //     // translate post_title
-        //     $trans['TITLE'] = $_POST['post_title'] . $languageStr;
-        //     // translate each : post_content
-        //     $trans['CONTENT'] = $_POST['post_content'] . $languageStr;
-        //     $newTranslations[$lang] = $trans;
-		// }
+	function admin_notices() {
+		if ( !isset($_SESSION['yoda-session-notice']) || !$_SESSION['yoda-session-notice'] ) {
+			return;
+		}
+		$notice = $_SESSION['yoda-session-notice'];
+		?>
+		<div class="notice-<?php echo $notice['type']; ?> notice">
+			<p><?php _e( $notice['message'], 'yoda_translations_notice' ); ?></p>
+		</div>
+		<?php
+		$_SESSION['yoda-session-notice'] = false;
+	}
 
-
-
-        update_post_meta( $post_id, 'translations', $newTranslations );
-
+	private function display_message($message, $type) {
+		$_SESSION['yoda-session-notice'] = [
+			'message' => $message,
+			'type' => $type
+		];
 	}
 
     // --------------------------- WIZARDS -------------------------------------
@@ -507,38 +519,6 @@ class Yoda_WP_Admin {
         ) );
 
         $this->validate_meta( $_POST, $post_id, $object, $nonces, $fields);
-
-        // fake translations
-
-        $metas = get_post_meta( $post_id );
-        //$metas = unserialize($metas);
-        $translations = $metas['translations'] ?? [];
-        $newTranslations = [];
-
-        $langs = array( 'es', 'jp', 'de' );
-
-        foreach ($langs as $lang) {
-            $languageStr = "( !!!!! in " . $lang . " !!!!! )";
-            // see if lang key exists
-            $trans = ( isset( $translations[$lang] ) ) ?? [];
-            // translate title
-            $trans['TITLE'] = $_POST['post_title'] . $languageStr;
-            // translate each : step-title / stepContent
-            $trans['STEPS'] = [];
-
-            foreach ($_POST['step-title'] as $i => $value) {
-                if ( ! empty( $value ) ) {
-                    $trans['STEPS'][$i]['TITLE'] = $value . $languageStr;
-                }
-            }
-            foreach ($_POST['stepContent'] as $i => $value) {
-                if ( ! empty( $value ) ) {
-                    $trans['STEPS'][$i]['CONTENT'] = $value . $languageStr;
-                }
-            }
-            $newTranslations[$lang] = $trans;
-        }
-        update_post_meta( $post_id, 'translations', $newTranslations );
     }
 
 
@@ -610,10 +590,6 @@ class Yoda_WP_Admin {
 				$new_value = $this->sanitizer( $type, $posted[$name] ?? null );
 			}
 			update_post_meta( $post_id, $name, $new_value );
-
-            // dummy translations
-
-            //$translations = $this->$db::getGuideAvailableTranslations($object);
 		} // foreach
 	}
 
